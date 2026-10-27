@@ -42,8 +42,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             key={item.id}
             className={cn(
               'flex items-start gap-3 px-4 py-3 rounded-xl shadow-lg border animate-slide-up text-sm',
-              item.type === 'success' && 'bg-forest text-ivory border-forest',
-              item.type === 'info' && 'bg-white text-charcoal border-sage/40',
+              item.type === 'success' && 'bg-forest text-ivory border-forest/80',
+              item.type === 'info' && 'bg-white/95 text-charcoal border-sage/30 backdrop-blur-md',
               item.type === 'error' && 'bg-red-50 text-red-900 border-red-200',
             )}
             role="status"

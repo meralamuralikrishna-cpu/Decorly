@@ -50,5 +50,5 @@ Designed so a future **Node / Express / PostgreSQL** API can replace `lib/storag
 
 - React 19 + React Router
 - Tailwind CSS v4 (`@tailwindcss/vite`)
-- Fonts: Cormorant Garamond (headings), Inter (body)
+- Fonts: Fraunces (display), Manrope (body)
 - Icons: lucide-react

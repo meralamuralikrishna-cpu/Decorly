@@ -40,7 +40,7 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: M
         aria-labelledby="modal-title"
         tabIndex={-1}
         className={cn(
-          'relative z-10 w-full bg-ivory rounded-2xl shadow-xl border border-sage/40 animate-scale-in outline-none',
+          'relative z-10 w-full bg-ivory/95 backdrop-blur-md rounded-2xl shadow-2xl border border-sage/30 animate-scale-in outline-none',
           size === 'sm' && 'max-w-sm',
           size === 'md' && 'max-w-lg',
           size === 'lg' && 'max-w-2xl',

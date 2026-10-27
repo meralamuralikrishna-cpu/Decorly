@@ -9,6 +9,7 @@ import { DemoBadge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
+import { PageHeader } from '@/components/ui/PageHeader';
 import { formatINR, cn } from '@/lib/utils';
 
 export function ExploreTemplates() {
@@ -33,15 +34,12 @@ export function ExploreTemplates() {
 
   return (
     <div className="p-6 md:p-10 animate-fade-in max-w-6xl mx-auto">
-      <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
-        <div>
-          <h1 className="font-display text-4xl text-forest">Explore Templates</h1>
-          <p className="text-sm text-charcoal/60 mt-1">
-            Curated starting points. All items are labelled demo data.
-          </p>
-        </div>
-        <DemoBadge />
-      </div>
+      <PageHeader
+        kicker="Inspiration"
+        title="Explore Templates"
+        description="Curated starting points. All items are labelled demo data."
+        action={<DemoBadge />}
+      />
 
       <div className="flex flex-wrap gap-3 mb-8 items-end">
         <div className="flex-1 min-w-[200px] relative">

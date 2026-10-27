@@ -525,25 +525,98 @@ export const DEFAULT_PROFILE: UserProfile = {
 };
 
 export const POPULAR_COMBOS = [
-  { id: 'pc1', name: 'Blush rose + eucalyptus', colors: ['#E8C7C4', '#A8B5A0'], note: 'Deterministic demo pick' },
-  { id: 'pc2', name: 'Ivory peony + champagne', colors: ['#FAF7F2', '#C5A46D'], note: 'Deterministic demo pick' },
-  { id: 'pc3', name: 'Marigold + forest leaf', colors: ['#E8A838', '#243D35'], note: 'Deterministic demo pick' },
-  { id: 'pc4', name: 'Orchid + sage', colors: ['#FFFFFF', '#A8B5A0'], note: 'Deterministic demo pick' },
+  {
+    id: 'pc1',
+    name: 'Blush rose + eucalyptus',
+    colors: ['#E8C7C4', '#A8B5A0'],
+    occasionKey: 'comboOccasionPc1' as const,
+    themeId: 'blush-romance' as const,
+  },
+  {
+    id: 'pc2',
+    name: 'Ivory peony + champagne',
+    colors: ['#FAF7F2', '#C5A46D'],
+    occasionKey: 'comboOccasionPc2' as const,
+    themeId: 'ivory-elegance' as const,
+  },
+  {
+    id: 'pc3',
+    name: 'Marigold + forest leaf',
+    colors: ['#E8A838', '#243D35'],
+    occasionKey: 'comboOccasionPc3' as const,
+    themeId: 'traditional-marigold' as const,
+  },
+  {
+    id: 'pc4',
+    name: 'Orchid + sage',
+    colors: ['#FFFFFF', '#A8B5A0'],
+    occasionKey: 'comboOccasionPc4' as const,
+    themeId: 'sage-garden' as const,
+  },
 ];
 
-export const SEED_DESIGN: Design = {
-  id: 'design-seed-1',
-  name: 'Sample Blush Arch',
-  createdAt: '2026-10-15T10:00:00.000Z',
-  updatedAt: '2026-10-20T16:00:00.000Z',
-  thumbnailTheme: 'blush-romance',
-  isFavorite: true,
-  eventDate: '2026-12-14',
-  notes: 'Demo design — safe to edit or delete.',
-  estimatedBudget: 95000,
-  settings: { ...DEFAULT_SETTINGS },
-  elements: DEMO_TEMPLATES[0].elements.map((el, i) => ({
-    ...el,
-    id: `seed-el-${i}`,
-  })),
-};
+function seedFromTemplate(
+  tplIndex: number,
+  meta: Pick<
+    Design,
+    'id' | 'name' | 'createdAt' | 'updatedAt' | 'isFavorite' | 'eventDate' | 'notes' | 'estimatedBudget'
+  >,
+): Design {
+  const tpl = DEMO_TEMPLATES[tplIndex];
+  return {
+    ...meta,
+    thumbnailTheme: tpl.themeId,
+    settings: { ...tpl.settings },
+    elements: tpl.elements.map((el, i) => ({
+      ...el,
+      id: `${meta.id}-el-${i}`,
+    })),
+  };
+}
+
+/** Default decoration designs shown in Recent / My Designs */
+export const SEED_DESIGNS: Design[] = [
+  seedFromTemplate(0, {
+    id: 'design-seed-1',
+    name: 'Blush Floral Arch',
+    createdAt: '2026-10-15T10:00:00.000Z',
+    updatedAt: '2026-10-26T18:00:00.000Z',
+    isFavorite: true,
+    eventDate: '2026-12-14',
+    notes: 'Ceremony arch with blush roses — demo design.',
+    estimatedBudget: 95000,
+  }),
+  seedFromTemplate(1, {
+    id: 'design-seed-2',
+    name: 'Sage Garden Reception',
+    createdAt: '2026-10-12T09:00:00.000Z',
+    updatedAt: '2026-10-25T14:30:00.000Z',
+    isFavorite: false,
+    eventDate: '2026-11-28',
+    notes: 'Greenery wall and soft uplights — demo design.',
+    estimatedBudget: 88000,
+  }),
+  seedFromTemplate(3, {
+    id: 'design-seed-3',
+    name: 'Marigold Courtyard',
+    createdAt: '2026-10-10T11:00:00.000Z',
+    updatedAt: '2026-10-24T11:00:00.000Z',
+    isFavorite: true,
+    eventDate: '2026-11-08',
+    notes: 'Festive Haldi courtyard look — demo design.',
+    estimatedBudget: 62000,
+  }),
+  seedFromTemplate(2, {
+    id: 'design-seed-4',
+    name: 'Royal Gold Mandap',
+    createdAt: '2026-10-08T08:00:00.000Z',
+    updatedAt: '2026-10-22T20:15:00.000Z',
+    isFavorite: false,
+    eventDate: '2027-01-18',
+    notes: 'Forest and champagne mandap — demo design.',
+    estimatedBudget: 185000,
+  }),
+];
+
+/** @deprecated use SEED_DESIGNS */
+export const SEED_DESIGN = SEED_DESIGNS[0];

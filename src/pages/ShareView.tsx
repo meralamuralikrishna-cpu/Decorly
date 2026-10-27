@@ -12,6 +12,8 @@ import { Input } from '@/components/ui/Input';
 import { Badge, DemoBadge } from '@/components/ui/Badge';
 import { formatDate, formatINR, cn } from '@/lib/utils';
 import { Check, MessageCircle, PencilLine } from 'lucide-react';
+import { Wordmark } from '@/components/brand/Wordmark';
+import { BrandMark } from '@/components/brand/BrandMark';
 
 const STATUS_LABEL: Record<ShareStatus, string> = {
   pending: 'Awaiting family feedback',
@@ -89,16 +91,17 @@ export function ShareView() {
 
   if (missing) {
     return (
-      <div className="min-h-screen bg-ivory flex flex-col">
-        <header className="border-b border-sage/30 bg-white/70 backdrop-blur px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="font-display text-2xl text-forest tracking-wide">
-            Decorly
+      <div className="min-h-screen app-atmosphere flex flex-col">
+        <header className="border-b border-sage/20 bg-white/70 backdrop-blur px-6 py-4 flex items-center justify-between">
+          <Link to="/">
+            <Wordmark size="md" />
           </Link>
           <DemoBadge />
         </header>
         <div className="flex-1 flex items-center justify-center p-8">
           <div className="max-w-md text-center space-y-4">
-            <h1 className="font-display text-3xl text-forest">Share link not found</h1>
+            <BrandMark tone="ink" className="h-20 w-auto mx-auto opacity-40" />
+            <h1 className="font-display text-3xl text-forest tracking-tight">Share link not found</h1>
             <p className="text-sm text-charcoal/60 leading-relaxed">
               Guest shares are stored in this browser only. Open the link on the same device
               where it was created, or ask the designer to share again.
@@ -114,18 +117,18 @@ export function ShareView() {
 
   if (!share) {
     return (
-      <div className="min-h-screen bg-ivory flex items-center justify-center text-charcoal/50 text-sm">
+      <div className="min-h-screen app-atmosphere flex items-center justify-center text-charcoal/50 text-sm">
         Loading share…
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F3EEE6]">
-      <header className="border-b border-sage/30 bg-white/80 backdrop-blur sticky top-0 z-20 px-4 md:px-8 py-3 flex flex-wrap items-center gap-3 justify-between">
+    <div className="min-h-screen app-atmosphere">
+      <header className="border-b border-sage/20 bg-white/75 backdrop-blur-xl sticky top-0 z-20 px-4 md:px-8 py-3 flex flex-wrap items-center gap-3 justify-between">
         <div className="flex items-center gap-3 min-w-0">
-          <Link to="/" className="font-display text-2xl text-forest tracking-wide shrink-0">
-            Decorly
+          <Link to="/" className="shrink-0">
+            <Wordmark size="md" />
           </Link>
           <span className="text-sage/60 hidden sm:inline">·</span>
           <div className="min-w-0">

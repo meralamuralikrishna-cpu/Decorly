@@ -23,7 +23,7 @@ import {
   DEMO_BUDGET,
   DEMO_NOTIFICATIONS,
   DEFAULT_PROFILE,
-  SEED_DESIGN,
+  SEED_DESIGNS,
 } from '@/data/mock';
 
 interface AppContextValue {
@@ -69,9 +69,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     loadJSON(StorageKeys.sidebarCollapsed, false),
   );
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [designs, setDesigns] = useState<Design[]>(() =>
-    loadJSON(StorageKeys.designs, [SEED_DESIGN]),
-  );
+  const [designs, setDesigns] = useState<Design[]>(() => {
+    const loaded = loadJSON<Design[]>(StorageKeys.designs, SEED_DESIGNS);
+    if (!loaded.length) return SEED_DESIGNS;
+    const ids = new Set(loaded.map((d) => d.id));
+    const missing = SEED_DESIGNS.filter((s) => !ids.has(s.id));
+    return missing.length ? [...loaded, ...missing] : loaded;
+  });
   const [moodboards, setMoodboards] = useState<MoodboardItem[]>(() =>
     loadJSON(StorageKeys.moodboards, DEMO_MOODBOARDS),
   );

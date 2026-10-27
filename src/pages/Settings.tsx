@@ -48,7 +48,9 @@ export function Settings() {
 
   return (
     <div className="p-6 md:p-10 animate-fade-in max-w-xl mx-auto">
-      <h1 className="font-display text-4xl text-forest mb-2">Settings</h1>
+      <h1 className="font-display text-4xl md:text-[2.75rem] text-forest tracking-tight leading-none mb-2">
+        Settings
+      </h1>
       <p className="text-sm text-charcoal/60 mb-8">
         Local preferences only. Ready later for Node/Express/PostgreSQL auth.
       </p>

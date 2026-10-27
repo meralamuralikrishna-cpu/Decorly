@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/Input';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ConfirmDialog } from '@/components/ui/Modal';
 import { DemoBadge } from '@/components/ui/Badge';
+import { PageHeader } from '@/components/ui/PageHeader';
 import { formatDate, formatINR, cn } from '@/lib/utils';
 
 export function MyDesigns() {
@@ -34,18 +35,19 @@ export function MyDesigns() {
 
   return (
     <div className="p-6 md:p-10 animate-fade-in max-w-6xl mx-auto">
-      <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
-        <div>
-          <h1 className="font-display text-4xl text-forest">My Designs</h1>
-          <p className="text-sm text-charcoal/60 mt-1">Stored in localStorage on this device.</p>
-        </div>
-        <Link to="/studio" onClick={() => setActiveDesignId(null)}>
-          <Button>
-            <Plus className="h-4 w-4" />
-            New design
-          </Button>
-        </Link>
-      </div>
+      <PageHeader
+        kicker="Library"
+        title="My Designs"
+        description="Stored in localStorage on this device."
+        action={
+          <Link to="/studio" onClick={() => setActiveDesignId(null)}>
+            <Button>
+              <Plus className="h-4 w-4" />
+              New design
+            </Button>
+          </Link>
+        }
+      />
 
       <div className="flex flex-wrap gap-3 mb-8">
         <div className="flex-1 min-w-[200px] relative">

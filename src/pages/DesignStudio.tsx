@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
 import type { CanvasElement, Design, LibraryItem, StudioSettings, VenuePlan } from '@/types';
-import { DEFAULT_SETTINGS } from '@/data/themes';
+import { DEFAULT_SETTINGS, getTheme, THEME_PRESETS } from '@/data/themes';
 import { DEMO_TEMPLATES } from '@/data/mock';
 import { applyDesignToBudget, estimateBudget } from '@/lib/budget';
 import { exportNodeAsPng, nextPaint } from '@/lib/exportPng';
@@ -19,6 +19,7 @@ import { DesignCanvas, CANVAS_W, CANVAS_H } from '@/components/studio/DesignCanv
 import { PropertiesPanel } from '@/components/studio/PropertiesPanel';
 import { categoryDefaultSize } from '@/components/studio/ElementVisual';
 import { clamp, formatINR } from '@/lib/utils';
+import type { ThemeId } from '@/types';
 
 interface StudioState {
   elements: CanvasElement[];
@@ -54,6 +55,7 @@ export function DesignStudio() {
   useEffect(() => {
     if (hydrated) return;
     const templateId = params.get('template');
+    const themeParam = params.get('theme');
     const loadId = params.get('design') ?? activeDesignId;
 
     if (templateId) {
@@ -71,6 +73,24 @@ export function DesignStudio() {
         setHydrated(true);
         return;
       }
+    }
+
+    if (themeParam && THEME_PRESETS.some((p) => p.id === themeParam)) {
+      const theme = getTheme(themeParam as ThemeId);
+      reset({
+        elements: [],
+        settings: {
+          ...DEFAULT_SETTINGS,
+          themeId: theme.id,
+          ...theme.defaultSettings,
+        },
+        venuePlan: DEFAULT_VENUE_PLAN(),
+      });
+      setDesignName(`${theme.name} look`);
+      setDesignId(uuid());
+      setActiveDesignId(null);
+      setHydrated(true);
+      return;
     }
 
     if (loadId) {

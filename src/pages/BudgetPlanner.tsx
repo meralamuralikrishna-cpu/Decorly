@@ -48,7 +48,9 @@ export function BudgetPlanner() {
     <div className="p-6 md:p-10 animate-fade-in max-w-4xl mx-auto">
       <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
         <div>
-          <h1 className="font-display text-4xl text-forest">Budget Planner</h1>
+          <h1 className="font-display text-4xl md:text-[2.75rem] text-forest tracking-tight leading-none">
+            Budget Planner
+          </h1>
           <p className="text-sm text-charcoal/60 mt-1">
             Illustrative planning only — no payments are processed.
           </p>

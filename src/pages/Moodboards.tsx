@@ -76,7 +76,9 @@ export function Moodboards() {
     <div className="p-6 md:p-10 animate-fade-in max-w-6xl mx-auto">
       <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
         <div>
-          <h1 className="font-display text-4xl text-forest">Moodboards</h1>
+          <h1 className="font-display text-4xl md:text-[2.75rem] text-forest tracking-tight leading-none">
+            Moodboards
+          </h1>
           <p className="text-sm text-charcoal/60 mt-1">Colour stories for your celebration.</p>
         </div>
         <Button onClick={() => setCreateOpen(true)}>
