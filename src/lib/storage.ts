@@ -29,4 +29,5 @@ export const StorageKeys = {
   notifications: 'notifications',
   sidebarCollapsed: 'sidebarCollapsed',
   activeDesignId: 'activeDesignId',
+  shares: 'shares',
 } as const;

@@ -11,6 +11,7 @@ import { BudgetPlanner } from '@/pages/BudgetPlanner';
 import { FindDecorators } from '@/pages/FindDecorators';
 import { Bookings } from '@/pages/Bookings';
 import { Settings } from '@/pages/Settings';
+import { ShareView } from '@/pages/ShareView';
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
       <ToastProvider>
         <BrowserRouter>
           <Routes>
+            <Route path="share/:shareId" element={<ShareView />} />
             <Route element={<AppShell />}>
               <Route index element={<Overview />} />
               <Route path="studio" element={<DesignStudio />} />

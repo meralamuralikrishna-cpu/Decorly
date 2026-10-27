@@ -8,24 +8,31 @@ import {
   Download,
   Save,
   Share2,
+  Image,
+  Map,
+  Link2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useApp } from '@/context/AppContext';
 import { t } from '@/lib/i18n';
+import { cn } from '@/lib/utils';
 
 interface Props {
   canUndo: boolean;
   canRedo: boolean;
   zoom: number;
+  floorPlanMode: boolean;
   onUndo: () => void;
   onRedo: () => void;
   onZoomIn: () => void;
   onZoomOut: () => void;
   onReset: () => void;
   onPreview: () => void;
-  onExport: () => void;
+  onExportJson: () => void;
+  onExportPng: () => void;
   onSave: () => void;
-  onShare: () => void;
+  onShareGuest: () => void;
+  onToggleFloorPlan: () => void;
   designName: string;
   onNameChange: (name: string) => void;
 }
@@ -34,15 +41,18 @@ export function StudioToolbar({
   canUndo,
   canRedo,
   zoom,
+  floorPlanMode,
   onUndo,
   onRedo,
   onZoomIn,
   onZoomOut,
   onReset,
   onPreview,
-  onExport,
+  onExportJson,
+  onExportPng,
   onSave,
-  onShare,
+  onShareGuest,
+  onToggleFloorPlan,
   designName,
   onNameChange,
 }: Props) {
@@ -75,6 +85,16 @@ export function StudioToolbar({
         <ZoomIn className="h-4 w-4" />
       </Button>
       <div className="h-6 w-px bg-sage/40 mx-1" />
+      <Button
+        variant={floorPlanMode ? 'primary' : 'ghost'}
+        size="sm"
+        onClick={onToggleFloorPlan}
+        aria-pressed={floorPlanMode}
+        title="Venue floor-plan mode"
+      >
+        <Map className="h-3.5 w-3.5" />
+        <span className="hidden sm:inline">Floor plan</span>
+      </Button>
       <Button variant="ghost" size="sm" onClick={onReset} aria-label={t(locale, 'reset')}>
         <RotateCcw className="h-3.5 w-3.5" />
         <span className="hidden sm:inline">{t(locale, 'reset')}</span>
@@ -84,12 +104,17 @@ export function StudioToolbar({
         <span className="hidden sm:inline">{t(locale, 'preview')}</span>
       </Button>
       <div className="flex-1" />
-      <Button variant="secondary" size="sm" onClick={onExport}>
+      <Button variant="secondary" size="sm" onClick={onExportPng} title="Download PNG image">
+        <Image className="h-3.5 w-3.5" />
+        <span className="hidden sm:inline">PNG</span>
+      </Button>
+      <Button variant="secondary" size="sm" onClick={onExportJson}>
         <Download className="h-3.5 w-3.5" />
         <span className="hidden sm:inline">{t(locale, 'export')}</span>
       </Button>
-      <Button variant="secondary" size="sm" onClick={onShare}>
-        <Share2 className="h-3.5 w-3.5" />
+      <Button variant="secondary" size="sm" onClick={onShareGuest} title="Guest / family share link">
+        <Link2 className="h-3.5 w-3.5" />
+        <Share2 className={cn('h-3.5 w-3.5 sm:hidden')} />
         <span className="hidden sm:inline">{t(locale, 'share')}</span>
       </Button>
       <Button variant="gold" size="sm" onClick={onSave}>

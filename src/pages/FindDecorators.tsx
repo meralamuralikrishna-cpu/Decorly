@@ -1,5 +1,6 @@
-import { useMemo, useState, FormEvent } from 'react';
+import { useEffect, useMemo, useState, FormEvent } from 'react';
 import { Heart, Search, Star } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
 import { DEMO_DECORATORS } from '@/data/mock';
 import { useApp } from '@/context/AppContext';
@@ -10,12 +11,13 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Modal } from '@/components/ui/Modal';
 import { DemoBadge } from '@/components/ui/Badge';
-import { cn } from '@/lib/utils';
+import { cn, formatINR } from '@/lib/utils';
 import type { Decorator } from '@/types';
 
 export function FindDecorators() {
-  const { decoratorFavorites, toggleDecoratorFavorite, saveBooking } = useApp();
+  const { designs, decoratorFavorites, toggleDecoratorFavorite, saveBooking } = useApp();
   const { toast } = useToast();
+  const [params] = useSearchParams();
   const [q, setQ] = useState('');
   const [city, setCity] = useState('all');
   const [favOnly, setFavOnly] = useState(false);
@@ -25,6 +27,25 @@ export function FindDecorators() {
   const [venue, setVenue] = useState('');
   const [notes, setNotes] = useState('');
   const [errors, setErrors] = useState<{ eventDate?: string; venue?: string }>({});
+
+  const linkedDesignId = params.get('design');
+  const linkedEstimate = Number(params.get('estimate') || 0);
+  const linkedDesign = useMemo(
+    () => (linkedDesignId ? designs.find((d) => d.id === linkedDesignId) ?? null : null),
+    [designs, linkedDesignId],
+  );
+  const estimate =
+    linkedEstimate > 0 ? linkedEstimate : (linkedDesign?.estimatedBudget ?? 0);
+
+  useEffect(() => {
+    if (!linkedDesign) return;
+    setNotes((prev) =>
+      prev.trim()
+        ? prev
+        : `Please quote for design “${linkedDesign.name}” (illustrative studio estimate ${formatINR(estimate)}). Demo inquiry only.`,
+    );
+    if (linkedDesign.eventDate) setEventDate(linkedDesign.eventDate);
+  }, [linkedDesign, estimate]);
 
   const cities = useMemo(
     () => ['all', ...Array.from(new Set(DEMO_DECORATORS.map((d) => d.city)))],
@@ -66,11 +87,21 @@ export function FindDecorators() {
       eventType,
       venue: venue.trim(),
       status: 'inquiry',
-      notes: notes.trim() || 'Demo inquiry — no message sent to a real decorator.',
+      notes:
+        notes.trim() ||
+        'Demo inquiry — no message sent to a real decorator.',
       isDemo: true,
       createdAt: new Date().toISOString(),
+      designId: linkedDesign?.id,
+      designName: linkedDesign?.name,
+      estimatedBudget: estimate > 0 ? estimate : undefined,
     });
-    toast('Inquiry saved locally (demo only)', 'success');
+    toast(
+      linkedDesign
+        ? `Inquiry saved with design “${linkedDesign.name}” (demo)`
+        : 'Inquiry saved locally (demo only)',
+      'success',
+    );
     setInquire(null);
     setEventDate('');
     setVenue('');
@@ -88,6 +119,25 @@ export function FindDecorators() {
         </div>
         <DemoBadge />
       </div>
+
+      {linkedDesign && (
+        <div className="mb-6 rounded-2xl border border-champagne/40 bg-champagne/10 px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs uppercase tracking-wider text-champagne font-medium">
+              Quote request from Studio
+            </p>
+            <p className="font-display text-xl text-forest mt-0.5">{linkedDesign.name}</p>
+            <p className="text-xs text-charcoal/60">
+              Illustrative estimate {formatINR(estimate)} — will attach to your inquiry.
+            </p>
+          </div>
+          <Link to={`/studio?design=${encodeURIComponent(linkedDesign.id)}`}>
+            <Button variant="secondary" size="sm">
+              Back to design
+            </Button>
+          </Link>
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-3 mb-8 items-end">
         <div className="flex-1 min-w-[200px] relative">
@@ -152,7 +202,7 @@ export function FindDecorators() {
                 </div>
                 <div className="flex gap-2">
                   <Button size="sm" className="flex-1" onClick={() => setInquire(d)}>
-                    Inquire
+                    {linkedDesign ? 'Request quote' : 'Inquire'}
                   </Button>
                   <Button
                     size="sm"
@@ -172,7 +222,11 @@ export function FindDecorators() {
       <Modal
         open={!!inquire}
         onClose={() => setInquire(null)}
-        title={`Inquire — ${inquire?.name ?? ''}`}
+        title={
+          linkedDesign
+            ? `Quote — ${inquire?.name ?? ''}`
+            : `Inquire — ${inquire?.name ?? ''}`
+        }
         footer={
           <>
             <Button variant="secondary" onClick={() => setInquire(null)}>
@@ -187,6 +241,14 @@ export function FindDecorators() {
         <p className="text-xs text-charcoal/50 mb-4">
           Demo form only. Nothing is sent to a real decorator or payment system.
         </p>
+        {linkedDesign && (
+          <div className="mb-4 rounded-xl bg-sage/15 border border-sage/30 px-3 py-2 text-xs text-charcoal/70">
+            Attaching design <span className="font-medium text-forest">{linkedDesign.name}</span>
+            {estimate > 0 && (
+              <> · studio estimate {formatINR(estimate)}</>
+            )}
+          </div>
+        )}
         <form id="inquire-form" onSubmit={submitInquiry} className="space-y-3">
           <Input
             label="Event date"
@@ -204,7 +266,14 @@ export function FindDecorators() {
               { value: 'Wedding', label: 'Wedding' },
               { value: 'Reception', label: 'Reception' },
               { value: 'Haldi', label: 'Haldi' },
+              { value: 'Mehendi', label: 'Mehendi' },
+              { value: 'Sangeet', label: 'Sangeet' },
               { value: 'Engagement', label: 'Engagement' },
+              { value: "Valentine's Day", label: "Valentine's Day" },
+              { value: 'Anniversary', label: 'Anniversary' },
+              { value: 'Birthday', label: 'Birthday' },
+              { value: 'Baby Shower', label: 'Baby Shower' },
+              { value: 'Diwali', label: 'Diwali' },
             ]}
           />
           <Input

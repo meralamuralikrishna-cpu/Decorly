@@ -1,4 +1,5 @@
 import { useRef, useCallback, MouseEvent as ReactMouseEvent } from 'react';
+import { Trash2 } from 'lucide-react';
 import type { CanvasElement } from '@/types';
 import { ElementVisual } from './ElementVisual';
 import { cn, clamp } from '@/lib/utils';
@@ -10,6 +11,7 @@ interface Props {
   density: number;
   onSelect: (id: string) => void;
   onChange: (el: CanvasElement) => void;
+  onDelete?: (id: string) => void;
   onInteractionStart?: () => void;
   canvasWidth: number;
   canvasHeight: number;
@@ -24,6 +26,7 @@ export function CanvasItem({
   density,
   onSelect,
   onChange,
+  onDelete,
   onInteractionStart,
   canvasWidth,
   canvasHeight,
@@ -128,9 +131,26 @@ export function CanvasItem({
 
       {selected && (
         <>
-          <span className="absolute -top-6 left-0 text-[10px] font-medium text-forest bg-ivory/90 px-1.5 py-0.5 rounded whitespace-nowrap">
+          <span className="absolute -top-6 left-0 text-[10px] font-medium text-forest bg-ivory/90 px-1.5 py-0.5 rounded whitespace-nowrap max-w-[70%] truncate">
             {element.name}
           </span>
+          <button
+            type="button"
+            aria-label={`Delete ${element.name}`}
+            title="Delete"
+            className="absolute -top-3 -right-3 h-6 w-6 rounded-full bg-red-700 text-white border-2 border-white shadow flex items-center justify-center hover:bg-red-800 cursor-pointer"
+            onMouseDown={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              onDelete?.(element.id);
+            }}
+          >
+            <Trash2 className="h-3 w-3" />
+          </button>
           <button
             type="button"
             aria-label="Resize element"

@@ -61,6 +61,14 @@ export function ExploreTemplates() {
             { value: 'Wedding', label: 'Wedding' },
             { value: 'Reception', label: 'Reception' },
             { value: 'Haldi', label: 'Haldi' },
+            { value: 'Mehendi', label: 'Mehendi' },
+            { value: 'Sangeet', label: 'Sangeet' },
+            { value: 'Engagement', label: 'Engagement' },
+            { value: "Valentine's Day", label: "Valentine's Day" },
+            { value: 'Anniversary', label: 'Anniversary' },
+            { value: 'Birthday', label: 'Birthday' },
+            { value: 'Baby Shower', label: 'Baby Shower' },
+            { value: 'Diwali', label: 'Diwali' },
           ]}
           value={eventType}
           onChange={(e) => setEventType(e.target.value)}

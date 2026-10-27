@@ -9,7 +9,7 @@ import { Select } from '@/components/ui/Select';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ConfirmDialog } from '@/components/ui/Modal';
 import { DemoBadge, Badge } from '@/components/ui/Badge';
-import { formatDate, cn } from '@/lib/utils';
+import { formatDate, formatINR, cn } from '@/lib/utils';
 import type { Booking } from '@/types';
 import { Link } from 'react-router-dom';
 
@@ -95,6 +95,26 @@ export function Bookings() {
                       <p className="text-sm text-charcoal/70 mt-1">
                         {b.eventType} · {formatDate(b.eventDate)} · {b.venue}
                       </p>
+                      {(b.designName || b.estimatedBudget != null) && (
+                        <p className="text-xs text-forest mt-2">
+                          {b.designId ? (
+                            <Link
+                              to={`/studio?design=${encodeURIComponent(b.designId)}`}
+                              className="underline decoration-champagne/60 hover:decoration-champagne"
+                            >
+                              {b.designName ?? 'Linked design'}
+                            </Link>
+                          ) : (
+                            b.designName
+                          )}
+                          {b.estimatedBudget != null && (
+                            <span className="text-charcoal/50">
+                              {' '}
+                              · estimate {formatINR(b.estimatedBudget)}
+                            </span>
+                          )}
+                        </p>
+                      )}
                       <p className="text-xs text-charcoal/50 mt-2">{b.notes}</p>
                     </div>
                     <div className="flex gap-2">

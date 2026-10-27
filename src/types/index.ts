@@ -61,6 +61,14 @@ export interface StudioSettings {
   arrangementStyle: ArrangementStyle;
 }
 
+export interface VenuePlan {
+  enabled: boolean;
+  imageDataUrl: string | null;
+  widthFt: number;
+  depthFt: number;
+  showGrid: boolean;
+}
+
 export interface Design {
   id: string;
   name: string;
@@ -73,6 +81,7 @@ export interface Design {
   isFavorite: boolean;
   eventDate?: string;
   notes?: string;
+  venuePlan?: VenuePlan;
 }
 
 export interface Template {
@@ -123,6 +132,33 @@ export interface Booking {
   notes: string;
   isDemo: boolean;
   createdAt: string;
+  designId?: string;
+  designName?: string;
+  estimatedBudget?: number;
+}
+
+export interface ShareComment {
+  id: string;
+  author: string;
+  body: string;
+  createdAt: string;
+}
+
+export type ShareStatus = 'pending' | 'approved' | 'changes';
+
+export interface SharedDesign {
+  id: string;
+  designId: string;
+  name: string;
+  elements: CanvasElement[];
+  settings: StudioSettings;
+  venuePlan?: VenuePlan;
+  estimatedBudget: number;
+  createdAt: string;
+  status: ShareStatus;
+  comments: ShareComment[];
+  approvedAt?: string;
+  approvedBy?: string;
 }
 
 export interface BudgetCategory {

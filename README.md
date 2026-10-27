@@ -22,10 +22,11 @@ Open the URL Vite prints (usually `http://localhost:5173`).
 
 ## Features
 
-- **Design Studio** — layered canvas with flowers, backdrops, furniture, lighting, fabrics, and props; drag / resize / rotate; undo / redo; themes; illustrative budget estimate
+- **Design Studio** — layered canvas with flowers, backdrops, furniture, lighting, fabrics, and props; drag / resize / rotate; undo / redo; themes; venue floor-plan mode; PNG / JSON export; illustrative budget estimate
+- **Guest share** — `/share/:id` read-only family view with comments and approve / request-changes (localStorage only)
 - **Overview** — hero, recent designs, upcoming events, budget progress, popular flower combos
 - **Explore Templates** — search, filters, favorites; open in Studio
-- **My Designs / Moodboards / Budget / Decorators / Bookings / Settings** — working forms, validation, toasts, confirm dialogs, empty states
+- **My Designs / Moodboards / Budget / Decorators / Bookings / Settings** — working forms, validation, toasts, confirm dialogs, empty states; Studio → Decorators quote attaches design + estimate to the booking
 - **EN / తెలుగు** language toggle in the header
 
 Demo content is labelled **Demo data**. Estimates are labelled **Illustrative estimate**. No fake payments or fake AI.

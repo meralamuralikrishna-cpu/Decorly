@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
-import type { CanvasElement, Design, LibraryItem, StudioSettings } from '@/types';
+import type { CanvasElement, Design, LibraryItem, StudioSettings, VenuePlan } from '@/types';
 import { DEFAULT_SETTINGS } from '@/data/themes';
 import { DEMO_TEMPLATES } from '@/data/mock';
-import { estimateBudget } from '@/lib/budget';
+import { applyDesignToBudget, estimateBudget } from '@/lib/budget';
+import { exportNodeAsPng, nextPaint } from '@/lib/exportPng';
+import { createSharedDesign, DEFAULT_VENUE_PLAN, shareUrl } from '@/lib/share';
 import { useApp } from '@/context/AppContext';
 import { useToast } from '@/components/ui/Toast';
 import { useUndoRedo } from '@/hooks/useUndoRedo';
@@ -16,21 +18,24 @@ import { MobileLibrary } from '@/components/studio/MobileLibrary';
 import { DesignCanvas, CANVAS_W, CANVAS_H } from '@/components/studio/DesignCanvas';
 import { PropertiesPanel } from '@/components/studio/PropertiesPanel';
 import { categoryDefaultSize } from '@/components/studio/ElementVisual';
-import { clamp } from '@/lib/utils';
+import { clamp, formatINR } from '@/lib/utils';
 
 interface StudioState {
   elements: CanvasElement[];
   settings: StudioSettings;
+  venuePlan: VenuePlan;
 }
 
 const EMPTY: StudioState = {
   elements: [],
   settings: { ...DEFAULT_SETTINGS },
+  venuePlan: DEFAULT_VENUE_PLAN(),
 };
 
 export function DesignStudio() {
-  const { designs, saveDesign, activeDesignId, setActiveDesignId } = useApp();
+  const { designs, saveDesign, activeDesignId, setActiveDesignId, budget, setBudget } = useApp();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [params] = useSearchParams();
   const { present, set, undo, redo, reset, canUndo, canRedo, commitSnapshot } =
     useUndoRedo<StudioState>(EMPTY);
@@ -41,9 +46,11 @@ export function DesignStudio() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [shareLink, setShareLink] = useState('');
   const [hydrated, setHydrated] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const canvasRef = useRef<HTMLDivElement>(null);
 
-  // Load from active design / template query once
   useEffect(() => {
     if (hydrated) return;
     const templateId = params.get('template');
@@ -53,7 +60,11 @@ export function DesignStudio() {
       const tpl = DEMO_TEMPLATES.find((t) => t.id === templateId);
       if (tpl) {
         const els = tpl.elements.map((el) => ({ ...el, id: uuid() }));
-        reset({ elements: els, settings: { ...tpl.settings } });
+        reset({
+          elements: els,
+          settings: { ...tpl.settings },
+          venuePlan: DEFAULT_VENUE_PLAN(),
+        });
         setDesignName(tpl.name + ' (copy)');
         setDesignId(uuid());
         setActiveDesignId(null);
@@ -65,7 +76,11 @@ export function DesignStudio() {
     if (loadId) {
       const d = designs.find((x) => x.id === loadId);
       if (d) {
-        reset({ elements: d.elements, settings: d.settings });
+        reset({
+          elements: d.elements,
+          settings: d.settings,
+          venuePlan: d.venuePlan ?? DEFAULT_VENUE_PLAN(),
+        });
         setDesignName(d.name);
         setDesignId(d.id);
         setHydrated(true);
@@ -73,11 +88,11 @@ export function DesignStudio() {
       }
     }
 
-    // Fresh studio with a starter scene
     const starter = DEMO_TEMPLATES[0];
     reset({
       elements: starter.elements.map((el) => ({ ...el, id: uuid() })),
       settings: { ...starter.settings },
+      venuePlan: DEFAULT_VENUE_PLAN(),
     });
     setDesignName('New celebration look');
     setDesignId(uuid());
@@ -111,7 +126,7 @@ export function DesignStudio() {
     return () => window.removeEventListener('keydown', onKey);
   }, [undo, redo, selectedId, set]);
 
-  const budget = useMemo(
+  const budgetEstimate = useMemo(
     () => estimateBudget(present.elements, present.settings),
     [present.elements, present.settings],
   );
@@ -152,8 +167,6 @@ export function DesignStudio() {
     [set],
   );
 
-  // Live drag updates without flooding undo — record on each change is ok for demo;
-  // for smoother UX we could debounce history. Keeping simple: update with history.
   const updateElementLive = useCallback(
     (el: CanvasElement) => {
       set(
@@ -167,9 +180,6 @@ export function DesignStudio() {
     [set],
   );
 
-  // Commit history after drag ends by wrapping: CanvasItem fires many updates with recordHistory false.
-  // We'll push a history snapshot when selection changes or settings change.
-
   const handleSettings = useCallback(
     (settings: StudioSettings) => {
       set((s) => ({ ...s, settings }));
@@ -177,10 +187,17 @@ export function DesignStudio() {
     [set],
   );
 
-  const handleSave = () => {
+  const handleVenuePlan = useCallback(
+    (venuePlan: VenuePlan) => {
+      set((s) => ({ ...s, venuePlan }));
+    },
+    [set],
+  );
+
+  const buildDesign = (): Design => {
     const now = new Date().toISOString();
     const existing = designs.find((d) => d.id === designId);
-    const design: Design = {
+    return {
       id: designId,
       name: designName.trim() || 'Untitled design',
       createdAt: existing?.createdAt ?? now,
@@ -188,22 +205,28 @@ export function DesignStudio() {
       thumbnailTheme: present.settings.themeId,
       elements: present.elements,
       settings: present.settings,
-      estimatedBudget: budget,
+      estimatedBudget: budgetEstimate,
       isFavorite: existing?.isFavorite ?? false,
       eventDate: existing?.eventDate,
       notes: existing?.notes,
+      venuePlan: present.venuePlan,
     };
+  };
+
+  const handleSave = () => {
+    const design = buildDesign();
     saveDesign(design);
     setActiveDesignId(design.id);
     toast('Design saved to this device', 'success');
   };
 
-  const handleExport = () => {
+  const handleExportJson = () => {
     const payload = {
       name: designName,
       settings: present.settings,
+      venuePlan: present.venuePlan,
       elements: present.elements,
-      illustrativeEstimate: budget,
+      illustrativeEstimate: budgetEstimate,
       exportedAt: new Date().toISOString(),
       note: 'Decorly demo export — illustrative only, no payment data.',
     };
@@ -217,18 +240,67 @@ export function DesignStudio() {
     toast('Exported design JSON', 'success');
   };
 
-  const handleShare = async () => {
-    const text = `Decorly design "${designName}" — illustrative estimate ${budget}. Local demo only.`;
+  const handleExportPng = async () => {
+    if (!canvasRef.current || exporting) return;
+    setExporting(true);
+    const prevSelected = selectedId;
+    setSelectedId(null);
     try {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(text);
-        toast('Share text copied to clipboard', 'success');
-      } else {
-        setShareOpen(true);
-      }
+      await nextPaint();
+      if (!canvasRef.current) throw new Error('Canvas unmounted');
+      const filename = `${designName.replace(/\s+/g, '-').toLowerCase() || 'decorly-design'}.png`;
+      await exportNodeAsPng(canvasRef.current, filename);
+      toast('Downloaded PNG — ready to share on WhatsApp', 'success');
     } catch {
-      setShareOpen(true);
+      toast('Could not export PNG. Try again after the canvas loads.', 'error');
+    } finally {
+      setExporting(false);
+      if (prevSelected) setSelectedId(prevSelected);
     }
+  };
+
+  const handleShareGuest = () => {
+    const design = buildDesign();
+    saveDesign(design);
+    setActiveDesignId(design.id);
+    const share = createSharedDesign({
+      designId: design.id,
+      name: design.name,
+      elements: design.elements,
+      settings: design.settings,
+      venuePlan: design.venuePlan,
+      estimatedBudget: design.estimatedBudget,
+    });
+    const url = shareUrl(share.id);
+    setShareLink(url);
+    setShareOpen(true);
+    void navigator.clipboard?.writeText(url).then(
+      () => toast('Guest share link copied', 'success'),
+      () => toast('Share link ready — copy from the dialog', 'info'),
+    );
+  };
+
+  const handleApplyToBudget = () => {
+    const next = applyDesignToBudget(
+      budget,
+      present.elements,
+      present.settings,
+      designName.trim() || 'Studio design',
+    );
+    setBudget(next);
+    handleSave();
+    toast('Design estimate applied to Budget Planner', 'success');
+    navigate('/budget');
+  };
+
+  const handleRequestQuote = () => {
+    const design = buildDesign();
+    saveDesign(design);
+    setActiveDesignId(design.id);
+    navigate(
+      `/decorators?design=${encodeURIComponent(design.id)}&estimate=${design.estimatedBudget}`,
+    );
+    toast('Pick a decorator to request a quote with this design', 'info');
   };
 
   return (
@@ -237,15 +309,30 @@ export function DesignStudio() {
         canUndo={canUndo}
         canRedo={canRedo}
         zoom={zoom}
+        floorPlanMode={present.venuePlan.enabled}
         onUndo={undo}
         onRedo={redo}
         onZoomIn={() => setZoom((z) => clamp(z + 0.1, 0.5, 1.5))}
         onZoomOut={() => setZoom((z) => clamp(z - 0.1, 0.5, 1.5))}
         onReset={() => setResetOpen(true)}
         onPreview={() => setPreviewOpen(true)}
-        onExport={handleExport}
+        onExportJson={handleExportJson}
+        onExportPng={() => void handleExportPng()}
         onSave={handleSave}
-        onShare={handleShare}
+        onShareGuest={handleShareGuest}
+        onToggleFloorPlan={() => {
+          const next = !present.venuePlan.enabled;
+          set((s) => ({
+            ...s,
+            venuePlan: { ...s.venuePlan, enabled: next },
+          }));
+          toast(
+            next
+              ? 'Floor-plan mode on — set hall size and upload a sketch'
+              : 'Scene mode restored',
+            'info',
+          );
+        }}
         designName={designName}
         onNameChange={setDesignName}
       />
@@ -256,13 +343,24 @@ export function DesignStudio() {
         </div>
 
         <DesignCanvas
+          ref={canvasRef}
           elements={present.elements}
-          selectedId={selectedId}
+          selectedId={exporting ? null : selectedId}
           settings={present.settings}
+          venuePlan={present.venuePlan}
           zoom={zoom}
+          hideChrome={exporting}
           onSelect={setSelectedId}
           onUpdateElement={(el) => {
             updateElementLive(el);
+          }}
+          onDeleteElement={(id) => {
+            set((s) => ({
+              ...s,
+              elements: s.elements.filter((e) => e.id !== id),
+            }));
+            setSelectedId(null);
+            toast('Element deleted', 'info');
           }}
           onInteractionStart={commitSnapshot}
         />
@@ -281,7 +379,11 @@ export function DesignStudio() {
               }));
               setSelectedId(null);
             }}
-            estimatedBudget={budget}
+            estimatedBudget={budgetEstimate}
+            venuePlan={present.venuePlan}
+            onVenuePlanChange={handleVenuePlan}
+            onApplyToBudget={handleApplyToBudget}
+            onRequestQuote={handleRequestQuote}
           />
         </div>
       </div>
@@ -302,6 +404,7 @@ export function DesignStudio() {
           reset({
             elements: starter.elements.map((el) => ({ ...el, id: uuid() })),
             settings: { ...starter.settings },
+            venuePlan: DEFAULT_VENUE_PLAN(),
           });
           setSelectedId(null);
           setResetOpen(false);
@@ -315,6 +418,7 @@ export function DesignStudio() {
             elements={present.elements}
             selectedId={null}
             settings={present.settings}
+            venuePlan={present.venuePlan}
             zoom={0.85}
             preview
             onSelect={() => {}}
@@ -326,18 +430,34 @@ export function DesignStudio() {
       <Modal
         open={shareOpen}
         onClose={() => setShareOpen(false)}
-        title="Share"
+        title="Guest / family share link"
+        size="md"
         footer={
-          <Button variant="secondary" onClick={() => setShareOpen(false)}>
-            Close
-          </Button>
+          <>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                void navigator.clipboard?.writeText(shareLink);
+                toast('Link copied', 'success');
+              }}
+            >
+              Copy link
+            </Button>
+            <Button variant="gold" onClick={() => window.open(shareLink, '_blank')}>
+              Open guest view
+            </Button>
+          </>
         }
       >
-        <p className="text-sm text-charcoal/70 mb-2">
-          Clipboard unavailable. Copy this text manually:
+        <p className="text-sm text-charcoal/70 mb-3 leading-relaxed">
+          Anyone with this link (on this browser / device) can view a read-only snapshot, leave
+          comments, and approve the look. Stored locally — not a real cloud share.
         </p>
-        <pre className="text-xs bg-sage/10 p-3 rounded-xl whitespace-pre-wrap">
-          {`Decorly design "${designName}" — illustrative estimate ${budget}. Local demo only.`}
+        <p className="text-xs text-champagne mb-2">
+          Illustrative estimate: {formatINR(budgetEstimate)}
+        </p>
+        <pre className="text-xs bg-sage/10 p-3 rounded-xl whitespace-pre-wrap break-all">
+          {shareLink}
         </pre>
       </Modal>
     </div>
