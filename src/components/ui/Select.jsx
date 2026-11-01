@@ -1,0 +1,19 @@
+import { SelectHTMLAttributes, forwardRef } from 'react';
+import { cn } from '@/lib/utils';
+export const Select = forwardRef(({ className, label, error, options, id, ...props }, ref) => {
+    const selectId = id ?? label?.toLowerCase().replace(/\s+/g, '-');
+    return (<div className="space-y-1.5">
+        {label && (<label htmlFor={selectId} className="block text-sm font-medium text-charcoal/80">
+            {label}
+          </label>)}
+        <select ref={ref} id={selectId} className={cn('w-full h-10 px-3 rounded-xl border bg-white/90 text-sm text-charcoal border-sage/40', 'focus:border-champagne focus:ring-2 focus:ring-champagne/25 outline-none transition shadow-sm', className)} {...props}>
+          {options.map((o) => (<option key={o.value} value={o.value}>
+              {o.label}
+            </option>))}
+        </select>
+        {error && (<p className="text-xs text-red-600" role="alert">
+            {error}
+          </p>)}
+      </div>);
+});
+Select.displayName = 'Select';
