@@ -1,6 +1,6 @@
 # Decorly — Event Decorations Design Studio
 
-Elegant editorial wedding-studio UI built with **React**, **TypeScript**, **Vite**, and **Tailwind CSS**. All data is local mock data persisted in `localStorage`. No API keys and no real backend.
+Elegant editorial wedding-studio UI built with **React**, **JavaScript**, **Vite**, **Tailwind CSS**, and Supabase Auth. Account data (including designs and budget plans) syncs to Supabase; local demo mode remains available without Supabase credentials.
 
 ## Setup
 
@@ -12,12 +12,21 @@ npm run dev
 
 Open the URL Vite prints (usually `http://localhost:5173`).
 
+## Supabase setup
+
+1. Create a Supabase project and add `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` to a local `.env` file (see `.env.example`). The legacy `VITE_SUPABASE_ANON_KEY` name is also supported.
+2. Run [`supabase/schema.sql`](supabase/schema.sql) in the Supabase SQL Editor to create the private per-user data table and Row Level Security policies.
+3. In Supabase Authentication, configure the allowed site and redirect URLs for your local and deployed app. Email confirmation can be enabled in the project’s auth settings.
+4. Restart `npm run dev`. Users can create an account or sign in; their data is loaded and saved under their authenticated user ID.
+
+Only the public anon key belongs in the browser. Never put a Supabase service role key in this app.
+
 ### Scripts
 
 | Command        | Description              |
 |----------------|--------------------------|
 | `npm run dev`  | Start Vite dev server    |
-| `npm run build`| Typecheck + production build |
+| `npm run build`| Production build |
 | `npm run preview` | Preview production build |
 
 ## Features
@@ -41,10 +50,10 @@ src/
   hooks/        # undo/redo
   lib/          # storage, i18n, budget, utils
   pages/        # route screens
-  types/        # shared TypeScript types
+  types/        # shared app data helpers
 ```
 
-Designed so a future **Node / Express / PostgreSQL** API can replace `lib/storage.ts` without rewriting UI.
+Without Supabase credentials the app stays in local demo mode and persists to browser `localStorage`.
 
 ## Tech
 

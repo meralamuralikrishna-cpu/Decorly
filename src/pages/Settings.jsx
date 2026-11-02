@@ -32,7 +32,7 @@ export function Settings() {
             city: city.trim() || '—',
             preferredLanguage: locale,
         });
-        toast('Profile saved locally', 'success');
+        toast('Profile saved', 'success');
     };
     const clearData = () => {
         Object.values(StorageKeys).forEach((k) => removeKey(k));
@@ -47,7 +47,7 @@ export function Settings() {
         Settings
       </h1>
       <p className="text-sm text-charcoal/60 mb-8">
-        Local preferences only. Ready later for Node/Express/PostgreSQL auth.
+        Your profile and planning data are saved with your Decorly account when Supabase is connected.
       </p>
 
       <form onSubmit={onSave} className="space-y-6">

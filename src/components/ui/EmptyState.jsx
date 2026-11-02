@@ -1,4 +1,3 @@
-import { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { BrandMark } from '@/components/brand/BrandMark';
 export function EmptyState({ icon, title, description, action, className }) {

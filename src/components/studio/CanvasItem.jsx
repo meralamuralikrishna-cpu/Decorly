@@ -1,4 +1,4 @@
-import { useRef, useCallback, MouseEvent as ReactMouseEvent } from 'react';
+import { useRef, useCallback } from 'react';
 import { Trash2 } from 'lucide-react';
 import { ElementVisual } from './ElementVisual';
 import { cn, clamp } from '@/lib/utils';

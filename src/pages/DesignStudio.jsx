@@ -40,6 +40,9 @@ export function DesignStudio() {
     const [hydrated, setHydrated] = useState(false);
     const [exporting, setExporting] = useState(false);
     const canvasRef = useRef(null);
+    const savedSnapshot = useRef(null);
+    const currentSnapshot = JSON.stringify({ name: designName, elements: present.elements, settings: present.settings, venuePlan: present.venuePlan });
+    const isDirty = savedSnapshot.current !== null && savedSnapshot.current !== currentSnapshot;
     useEffect(() => {
         if (hydrated)
             return;
@@ -103,6 +106,18 @@ export function DesignStudio() {
         setDesignId(uuid());
         setHydrated(true);
     }, [hydrated, params, activeDesignId, designs, reset, setActiveDesignId]);
+    useEffect(() => {
+        if (hydrated && savedSnapshot.current === null) savedSnapshot.current = currentSnapshot;
+    }, [hydrated, currentSnapshot]);
+    useEffect(() => {
+        if (!isDirty) return;
+        const warnBeforeLeave = (event) => {
+            event.preventDefault();
+            event.returnValue = '';
+        };
+        window.addEventListener('beforeunload', warnBeforeLeave);
+        return () => window.removeEventListener('beforeunload', warnBeforeLeave);
+    }, [isDirty]);
     useEffect(() => {
         const onKey = (e) => {
             if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey) {
@@ -192,6 +207,7 @@ export function DesignStudio() {
         const design = buildDesign();
         saveDesign(design);
         setActiveDesignId(design.id);
+        savedSnapshot.current = currentSnapshot;
         toast('Design saved to this device', 'success');
     };
     const handleExportJson = () => {
@@ -268,7 +284,7 @@ export function DesignStudio() {
         toast('Pick a decorator to request a quote with this design', 'info');
     };
     return (<div className="flex flex-col h-[calc(100vh-4rem)]">
-      <StudioToolbar canUndo={canUndo} canRedo={canRedo} zoom={zoom} floorPlanMode={present.venuePlan.enabled} onUndo={undo} onRedo={redo} onZoomIn={() => setZoom((z) => clamp(z + 0.1, 0.5, 1.5))} onZoomOut={() => setZoom((z) => clamp(z - 0.1, 0.5, 1.5))} onReset={() => setResetOpen(true)} onPreview={() => setPreviewOpen(true)} onExportJson={handleExportJson} onExportPng={() => void handleExportPng()} onSave={handleSave} onShareGuest={handleShareGuest} onToggleFloorPlan={() => {
+      <StudioToolbar canUndo={canUndo} canRedo={canRedo} zoom={zoom} floorPlanMode={present.venuePlan.enabled} saveStatus={isDirty ? 'Unsaved changes' : 'Saved'} onUndo={undo} onRedo={redo} onZoomIn={() => setZoom((z) => clamp(z + 0.1, 0.5, 1.5))} onZoomOut={() => setZoom((z) => clamp(z - 0.1, 0.5, 1.5))} onReset={() => setResetOpen(true)} onPreview={() => setPreviewOpen(true)} onExportJson={handleExportJson} onExportPng={() => void handleExportPng()} onSave={handleSave} onShareGuest={handleShareGuest} onToggleFloorPlan={() => {
             const next = !present.venuePlan.enabled;
             set((s) => ({
                 ...s,

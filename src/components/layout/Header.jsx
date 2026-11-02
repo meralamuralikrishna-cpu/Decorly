@@ -74,7 +74,7 @@ export function Header() {
               <p className="text-xs text-charcoal/50 mt-0.5">{profile.email}</p>
               <p className="text-xs text-charcoal/50">{profile.city}</p>
               <p className="text-[10px] text-champagne mt-3 uppercase tracking-[0.14em] font-semibold">
-                Local profile
+                {profile.email ? 'Account profile' : 'Local profile'}
               </p>
             </div>)}
         </div>

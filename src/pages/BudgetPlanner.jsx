@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/Input';
 import { DemoBadge } from '@/components/ui/Badge';
 import { formatINR } from '@/lib/utils';
 export function BudgetPlanner() {
-    const { budget, setBudget } = useApp();
+    const { budget, setBudget, authEnabled } = useApp();
     const { toast } = useToast();
     const [eventName, setEventName] = useState(budget.eventName);
     const [totalBudget, setTotalBudget] = useState(String(budget.totalBudget));
@@ -37,7 +37,7 @@ export function BudgetPlanner() {
             categories,
             updatedAt: new Date().toISOString(),
         });
-        toast('Budget plan saved locally', 'success');
+        toast(authEnabled ? 'Budget plan saved to your account' : 'Budget plan saved on this device', 'success');
     };
     return (<div className="p-6 md:p-10 animate-fade-in max-w-4xl mx-auto">
       <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
@@ -74,7 +74,7 @@ export function BudgetPlanner() {
                   <p className="text-sm font-medium text-charcoal">{c.name}</p>
                   <div className="grid grid-cols-2 gap-3">
                     <Input label="Planned" type="number" min={0} value={c.planned} onChange={(e) => updateCat(c.id, { planned: Number(e.target.value) || 0 })}/>
-                    <Input label="Spent (demo)" type="number" min={0} value={c.spent} onChange={(e) => updateCat(c.id, { spent: Number(e.target.value) || 0 })}/>
+                    <Input label="Spent" type="number" min={0} value={c.spent} onChange={(e) => updateCat(c.id, { spent: Number(e.target.value) || 0 })}/>
                   </div>
                   <div className="h-1.5 rounded-full bg-sage/25 overflow-hidden">
                     <div className="h-full bg-champagne rounded-full" style={{ width: `${pct}%` }}/>

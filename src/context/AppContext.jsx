@@ -1,8 +1,22 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, ReactNode, } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { loadJSON, saveJSON, StorageKeys } from '@/lib/storage';
 import { DEMO_MOODBOARDS, DEMO_BOOKINGS, DEMO_BUDGET, DEMO_NOTIFICATIONS, DEFAULT_PROFILE, SEED_DESIGNS, } from '@/data/mock';
+import { supabase } from '@/lib/supabase';
 const AppContext = createContext(null);
 export function AppProvider({ children }) {
+    const [user, setUser] = useState(null);
+    const [authReady, setAuthReady] = useState(!supabase);
+    const [cloudReady, setCloudReady] = useState(false);
+    useEffect(() => {
+        if (!supabase) return;
+        let alive = true;
+        supabase.auth.getSession().then(({ data }) => { if (alive) { setUser(data.session?.user ?? null); setAuthReady(true); } });
+        const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null);
+            if (!session) setCloudReady(false);
+        });
+        return () => { alive = false; listener.subscription.unsubscribe(); };
+    }, []);
     const [locale, setLocaleState] = useState(() => loadJSON(StorageKeys.locale, 'en'));
     const [sidebarCollapsed, setSidebarCollapsedState] = useState(() => loadJSON(StorageKeys.sidebarCollapsed, false));
     const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -22,6 +36,42 @@ export function AppProvider({ children }) {
     const [templateFavorites, setTemplateFavorites] = useState(() => loadJSON(StorageKeys.favorites + ':templates', []));
     const [decoratorFavorites, setDecoratorFavorites] = useState(() => loadJSON(StorageKeys.favorites + ':decorators', []));
     const [activeDesignId, setActiveDesignIdState] = useState(() => loadJSON(StorageKeys.activeDesignId, null));
+    useEffect(() => {
+        if (!supabase || !user) { setCloudReady(false); return; }
+        let alive = true;
+        setCloudReady(false);
+        (async () => {
+            const { data, error } = await supabase.from('user_data').select('payload').eq('user_id', user.id).maybeSingle();
+            if (!alive) return;
+            if (error) { console.error('Could not load account data', error); setCloudReady(true); return; }
+            const p = data?.payload;
+            if (p) {
+                if (p.designs) setDesigns(p.designs);
+                if (p.moodboards) setMoodboards(p.moodboards);
+                if (p.bookings) setBookings(p.bookings);
+                if (p.budget) setBudgetState(p.budget);
+                if (p.profile) setProfileState({ ...DEFAULT_PROFILE, ...p.profile, email: user.email ?? p.profile.email });
+                else setProfileState((old) => ({ ...old, email: user.email ?? old.email }));
+                if (p.templateFavorites) setTemplateFavorites(p.templateFavorites);
+                if (p.decoratorFavorites) setDecoratorFavorites(p.decoratorFavorites);
+                if (p.locale) setLocaleState(p.locale);
+                if (p.notifications) setNotifications(p.notifications);
+                if (p.activeDesignId) setActiveDesignIdState(p.activeDesignId);
+            } else {
+                setDesigns(SEED_DESIGNS);
+                setMoodboards(DEMO_MOODBOARDS);
+                setBookings(DEMO_BOOKINGS);
+                setBudgetState(DEMO_BUDGET);
+                setNotifications(DEMO_NOTIFICATIONS);
+                setTemplateFavorites([]);
+                setDecoratorFavorites([]);
+                setActiveDesignIdState(null);
+                setProfileState({ ...DEFAULT_PROFILE, name: user.user_metadata?.name || DEFAULT_PROFILE.name, email: user.email ?? DEFAULT_PROFILE.email });
+            }
+            setCloudReady(true);
+        })();
+        return () => { alive = false; };
+    }, [user?.id]);
     useEffect(() => saveJSON(StorageKeys.locale, locale), [locale]);
     useEffect(() => saveJSON(StorageKeys.sidebarCollapsed, sidebarCollapsed), [sidebarCollapsed]);
     useEffect(() => saveJSON(StorageKeys.designs, designs), [designs]);
@@ -33,6 +83,24 @@ export function AppProvider({ children }) {
     useEffect(() => saveJSON(StorageKeys.favorites + ':templates', templateFavorites), [templateFavorites]);
     useEffect(() => saveJSON(StorageKeys.favorites + ':decorators', decoratorFavorites), [decoratorFavorites]);
     useEffect(() => saveJSON(StorageKeys.activeDesignId, activeDesignId), [activeDesignId]);
+    useEffect(() => {
+        if (!supabase || !user || !cloudReady) return;
+        const payload = { designs, moodboards, bookings, budget, profile, templateFavorites, decoratorFavorites, locale, notifications, activeDesignId };
+        const timer = setTimeout(async () => {
+            const { error } = await supabase.from('user_data').upsert({ user_id: user.id, payload, updated_at: new Date().toISOString() });
+            if (error) console.error('Could not save account data', error);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [user?.id, cloudReady, designs, moodboards, bookings, budget, profile, templateFavorites, decoratorFavorites, locale, notifications, activeDesignId]);
+    const signIn = useCallback(async (email, password) => {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        return { session: data.session, error: error?.message };
+    }, []);
+    const signUp = useCallback(async (email, password, name) => {
+        const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { name } } });
+        return { session: data.session, error: error?.message };
+    }, []);
+    const signOut = useCallback(async () => { if (supabase) await supabase.auth.signOut(); }, []);
     const setLocale = useCallback((l) => {
         setLocaleState(l);
         setProfileState((p) => ({ ...p, preferredLanguage: l }));
@@ -132,6 +200,13 @@ export function AppProvider({ children }) {
         toggleDecoratorFavorite,
         activeDesignId,
         setActiveDesignId,
+        user,
+        authReady,
+        cloudReady,
+        authEnabled: !!supabase,
+        signIn,
+        signUp,
+        signOut,
     }), [
         locale,
         setLocale,
@@ -162,6 +237,12 @@ export function AppProvider({ children }) {
         toggleDecoratorFavorite,
         activeDesignId,
         setActiveDesignId,
+        user,
+        authReady,
+        cloudReady,
+        signIn,
+        signUp,
+        signOut,
     ]);
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

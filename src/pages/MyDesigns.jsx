@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Plus, Search, Trash2 } from 'lucide-react';
+import { Heart, Plus, Search, Trash2, Copy } from 'lucide-react';
+import { v4 as uuid } from 'uuid';
 import { useApp } from '@/context/AppContext';
 import { useToast } from '@/components/ui/Toast';
 import { getTheme } from '@/data/themes';
@@ -13,7 +14,7 @@ import { DemoBadge } from '@/components/ui/Badge';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { formatDate, formatINR, cn } from '@/lib/utils';
 export function MyDesigns() {
-    const { designs, deleteDesign, toggleDesignFavorite, setActiveDesignId, } = useApp();
+    const { designs, deleteDesign, saveDesign, toggleDesignFavorite, setActiveDesignId, } = useApp();
     const { toast } = useToast();
     const [q, setQ] = useState('');
     const [favOnly, setFavOnly] = useState(false);
@@ -75,6 +76,13 @@ export function MyDesigns() {
                         Open
                       </Button>
                     </Link>
+                    <Button size="sm" variant="secondary" aria-label={`Duplicate ${d.name}`} title="Duplicate design" onClick={() => {
+                      const copy = { ...d, id: uuid(), name: `${d.name} copy`, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), elements: d.elements.map((element) => ({ ...element, id: uuid() })) };
+                      saveDesign(copy);
+                      toast('Design duplicated', 'success');
+                    }}>
+                      <Copy className="h-3.5 w-3.5"/>
+                    </Button>
                     <Button size="sm" variant="secondary" aria-label={`Delete ${d.name}`} onClick={() => setDeleteId(d.id)}>
                       <Trash2 className="h-3.5 w-3.5"/>
                     </Button>

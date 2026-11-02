@@ -3,10 +3,11 @@ import { Button } from '@/components/ui/Button';
 import { useApp } from '@/context/AppContext';
 import { t } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
-export function StudioToolbar({ canUndo, canRedo, zoom, floorPlanMode, onUndo, onRedo, onZoomIn, onZoomOut, onReset, onPreview, onExportJson, onExportPng, onSave, onShareGuest, onToggleFloorPlan, designName, onNameChange, }) {
+export function StudioToolbar({ canUndo, canRedo, zoom, floorPlanMode, onUndo, onRedo, onZoomIn, onZoomOut, onReset, onPreview, onExportJson, onExportPng, onSave, onShareGuest, onToggleFloorPlan, designName, onNameChange, saveStatus = 'Saved' }) {
     const { locale } = useApp();
     return (<div className="h-14 shrink-0 border-b border-sage/30 bg-white/80 backdrop-blur flex items-center gap-2 px-3 overflow-x-auto">
       <input type="text" value={designName} onChange={(e) => onNameChange(e.target.value)} className="font-display text-lg text-forest bg-transparent border-b border-transparent focus:border-champagne outline-none min-w-[140px] max-w-[200px]" aria-label="Design name"/>
+      <span className="hidden sm:inline text-[11px] text-charcoal/50 whitespace-nowrap" aria-live="polite">{saveStatus}</span>
       <div className="h-6 w-px bg-sage/40 mx-1"/>
       <Button variant="ghost" size="icon" onClick={onUndo} disabled={!canUndo} aria-label={t(locale, 'undo')} title={t(locale, 'undo')}>
         <Undo2 className="h-4 w-4"/>

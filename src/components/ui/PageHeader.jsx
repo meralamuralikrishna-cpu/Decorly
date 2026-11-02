@@ -1,4 +1,3 @@
-import { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 export function PageHeader({ kicker, title, description, action, className }) {
     return (<div className={cn('flex flex-wrap items-end justify-between gap-4 mb-8', className)}>
