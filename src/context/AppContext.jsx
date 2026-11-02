@@ -99,7 +99,14 @@ export function AppProvider({ children }) {
     }, []);
     const signUp = useCallback(async (email, password, name) => {
         if (!supabase) return { error: 'Account creation is unavailable. Configure the Supabase URL and publishable key, then restart the app.' };
-        const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { name } } });
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                data: { name },
+                emailRedirectTo: `${window.location.origin}/`,
+            },
+        });
         return { session: data.session, error: error?.message };
     }, []);
     const signOut = useCallback(async () => { if (supabase) await supabase.auth.signOut(); }, []);

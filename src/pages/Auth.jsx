@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Wordmark } from '@/components/brand/Wordmark';
+import { Navigate } from 'react-router-dom';
 
 export function Auth() {
-  const { signIn, signUp, authEnabled } = useApp();
+  const { signIn, signUp, authEnabled, user } = useApp();
   const [mode, setMode] = useState('login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -14,12 +15,13 @@ export function Auth() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  if (authEnabled && user) return <Navigate to="/" replace />;
   const submit = async (e) => {
     e.preventDefault(); setBusy(true); setError(''); setMessage('');
     try {
       const result = mode === 'login' ? await signIn(email, password) : await signUp(email, password, name);
       if (result.error) setError(result.error);
-      else if (mode === 'signup' && !result.session) setMessage('Check your email to confirm your account, then sign in.');
+      else if (mode === 'signup' && !result.session) setMessage('Account created. Confirm your email, then return here and sign in. If confirmation opens Decorly automatically, you are already signed in.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not connect to Supabase. Check the project settings and try again.');
     } finally { setBusy(false); }
