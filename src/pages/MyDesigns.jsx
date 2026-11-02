@@ -14,7 +14,7 @@ import { DemoBadge } from '@/components/ui/Badge';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { formatDate, formatINR, cn } from '@/lib/utils';
 export function MyDesigns() {
-    const { designs, deleteDesign, saveDesign, toggleDesignFavorite, setActiveDesignId, authEnabled } = useApp();
+    const { designs, deleteDesign, saveDesign, toggleDesignFavorite, setActiveDesignId, canSaveData } = useApp();
     const { toast } = useToast();
     const [q, setQ] = useState('');
     const [favOnly, setFavOnly] = useState(false);
@@ -29,7 +29,7 @@ export function MyDesigns() {
         });
     }, [designs, q, favOnly]);
     return (<div className="p-6 md:p-10 animate-fade-in max-w-6xl mx-auto">
-      <PageHeader kicker="Library" title="My Designs" description={authEnabled ? 'Your designs are saved to your Decorly account.' : 'Demo designs are temporary. Sign in to save your work.'} action={<Link to="/studio" onClick={() => setActiveDesignId(null)}>
+      <PageHeader kicker="Library" title="My Designs" description={canSaveData ? 'Your designs are saved to your Decorly account.' : 'Demo designs are temporary. Sign in to save your work.'} action={<Link to="/studio" onClick={() => setActiveDesignId(null)}>
             <Button>
               <Plus className="h-4 w-4"/>
               New design

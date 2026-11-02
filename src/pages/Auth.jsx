@@ -7,7 +7,7 @@ import { Wordmark } from '@/components/brand/Wordmark';
 import { Navigate } from 'react-router-dom';
 
 export function Auth() {
-  const { signIn, signUp, authEnabled, user } = useApp();
+  const { signIn, signUp, authEnabled, user, enterOfflineDemo } = useApp();
   const [mode, setMode] = useState('login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -41,6 +41,10 @@ export function Auth() {
         {message && <p role="status" className="text-sm text-forest">{message}</p>}
         <Button className="w-full justify-center" disabled={busy || !authEnabled}>{busy ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}</Button>
       </form>
+      <div className="mt-5 border-t border-sage/20 pt-4">
+        <Button type="button" variant="secondary" className="w-full justify-center" onClick={enterOfflineDemo}>Continue with offline demo</Button>
+        <p className="text-[11px] text-charcoal/50 text-center mt-2">Demo only. This does not sign you into an account or save changes.</p>
+      </div>
     </CardBody></Card>
   </main>;
 }

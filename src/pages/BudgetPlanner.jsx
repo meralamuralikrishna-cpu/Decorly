@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/Input';
 import { DemoBadge } from '@/components/ui/Badge';
 import { formatINR } from '@/lib/utils';
 export function BudgetPlanner() {
-    const { budget, setBudget, authEnabled } = useApp();
+    const { budget, setBudget, canSaveData } = useApp();
     const { toast } = useToast();
     const [eventName, setEventName] = useState(budget.eventName);
     const [totalBudget, setTotalBudget] = useState(String(budget.totalBudget));
@@ -37,7 +37,7 @@ export function BudgetPlanner() {
             categories,
             updatedAt: new Date().toISOString(),
         });
-        toast(authEnabled ? 'Budget plan saved to your account' : 'Demo change only — sign in to save your budget', authEnabled ? 'success' : 'info');
+        toast(canSaveData ? 'Budget plan saved to your account' : 'Demo change only — sign in to save your budget', canSaveData ? 'success' : 'info');
     };
     return (<div className="p-6 md:p-10 animate-fade-in max-w-4xl mx-auto">
       <div className="flex flex-wrap items-end justify-between gap-4 mb-8">

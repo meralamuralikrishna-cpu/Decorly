@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 const AppContext = createContext(null);
 export function AppProvider({ children }) {
     const [user, setUser] = useState(null);
+    const [offlineDemo, setOfflineDemo] = useState(false);
     const [authReady, setAuthReady] = useState(!supabase);
     const [cloudReady, setCloudReady] = useState(false);
     useEffect(() => {
@@ -90,6 +91,8 @@ export function AppProvider({ children }) {
         return { session: data.session, error: error?.message };
     }, []);
     const signOut = useCallback(async () => { if (supabase) await supabase.auth.signOut(); }, []);
+    const enterOfflineDemo = useCallback(() => setOfflineDemo(true), []);
+    const leaveOfflineDemo = useCallback(() => setOfflineDemo(false), []);
     const setLocale = useCallback((l) => {
         setLocaleState(l);
         setProfileState((p) => ({ ...p, preferredLanguage: l }));
@@ -193,6 +196,10 @@ export function AppProvider({ children }) {
         authReady,
         cloudReady,
         authEnabled: !!supabase,
+        canSaveData: !!supabase && !!user && !offlineDemo,
+        offlineDemo,
+        enterOfflineDemo,
+        leaveOfflineDemo,
         signIn,
         signUp,
         signOut,
@@ -229,6 +236,9 @@ export function AppProvider({ children }) {
         user,
         authReady,
         cloudReady,
+        offlineDemo,
+        enterOfflineDemo,
+        leaveOfflineDemo,
         signIn,
         signUp,
         signOut,

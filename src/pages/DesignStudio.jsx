@@ -24,7 +24,7 @@ const EMPTY = {
     venuePlan: DEFAULT_VENUE_PLAN(),
 };
 export function DesignStudio() {
-    const { designs, saveDesign, activeDesignId, setActiveDesignId, budget, setBudget, authEnabled } = useApp();
+    const { designs, saveDesign, activeDesignId, setActiveDesignId, budget, setBudget, canSaveData } = useApp();
     const { toast } = useToast();
     const navigate = useNavigate();
     const [params] = useSearchParams();
@@ -208,7 +208,7 @@ export function DesignStudio() {
         saveDesign(design);
         setActiveDesignId(design.id);
         savedSnapshot.current = currentSnapshot;
-        toast(authEnabled ? 'Design saved to your account' : 'Demo change only — sign in to save your design', authEnabled ? 'success' : 'info');
+        toast(canSaveData ? 'Design saved to your account' : 'Demo change only — sign in to save your design', canSaveData ? 'success' : 'info');
     };
     const handleExportJson = () => {
         const payload = {
