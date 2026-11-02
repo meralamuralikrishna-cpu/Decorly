@@ -106,7 +106,7 @@ export function Bookings() {
             </li>))}
         </ul>)}
 
-      <ConfirmDialog open={!!deleteId} title="Delete booking?" message="This demo booking will be removed from localStorage." confirmLabel="Delete" danger onCancel={() => setDeleteId(null)} onConfirm={() => {
+      <ConfirmDialog open={!!deleteId} title="Delete booking?" message="This booking will be removed from your account." confirmLabel="Delete" danger onCancel={() => setDeleteId(null)} onConfirm={() => {
             if (deleteId) {
                 deleteBooking(deleteId);
                 toast('Booking deleted', 'info');

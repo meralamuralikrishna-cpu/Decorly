@@ -24,7 +24,7 @@ const EMPTY = {
     venuePlan: DEFAULT_VENUE_PLAN(),
 };
 export function DesignStudio() {
-    const { designs, saveDesign, activeDesignId, setActiveDesignId, budget, setBudget } = useApp();
+    const { designs, saveDesign, activeDesignId, setActiveDesignId, budget, setBudget, authEnabled } = useApp();
     const { toast } = useToast();
     const navigate = useNavigate();
     const [params] = useSearchParams();
@@ -208,7 +208,7 @@ export function DesignStudio() {
         saveDesign(design);
         setActiveDesignId(design.id);
         savedSnapshot.current = currentSnapshot;
-        toast('Design saved to this device', 'success');
+        toast(authEnabled ? 'Design saved to your account' : 'Demo change only — sign in to save your design', authEnabled ? 'success' : 'info');
     };
     const handleExportJson = () => {
         const payload = {
@@ -252,22 +252,26 @@ export function DesignStudio() {
                 setSelectedId(prevSelected);
         }
     };
-    const handleShareGuest = () => {
+    const handleShareGuest = async () => {
         const design = buildDesign();
         saveDesign(design);
         setActiveDesignId(design.id);
-        const share = createSharedDesign({
-            designId: design.id,
-            name: design.name,
-            elements: design.elements,
-            settings: design.settings,
-            venuePlan: design.venuePlan,
-            estimatedBudget: design.estimatedBudget,
-        });
-        const url = shareUrl(share.id);
-        setShareLink(url);
-        setShareOpen(true);
-        void navigator.clipboard?.writeText(url).then(() => toast('Guest share link copied', 'success'), () => toast('Share link ready — copy from the dialog', 'info'));
+        try {
+            const share = await createSharedDesign({
+                designId: design.id,
+                name: design.name,
+                elements: design.elements,
+                settings: design.settings,
+                venuePlan: design.venuePlan,
+                estimatedBudget: design.estimatedBudget,
+            });
+            const url = shareUrl(share.id);
+            setShareLink(url);
+            setShareOpen(true);
+            void navigator.clipboard?.writeText(url).then(() => toast('Guest share link copied', 'success'), () => toast('Share link ready — copy from the dialog', 'info'));
+        } catch (error) {
+            toast(error instanceof Error ? error.message : 'Could not create share link. Check the database setup and try again.', 'error');
+        }
     };
     const handleApplyToBudget = () => {
         const next = applyDesignToBudget(budget, present.elements, present.settings, designName.trim() || 'Studio design');
@@ -359,7 +363,7 @@ export function DesignStudio() {
           </>}>
         <p className="text-sm text-charcoal/70 mb-3 leading-relaxed">
           Anyone with this link (on this browser / device) can view a read-only snapshot, leave
-          comments, and approve the look. Stored locally — not a real cloud share.
+          comments, and approve the look. The share and feedback are stored in Supabase.
         </p>
         <p className="text-xs text-champagne mb-2">
           Illustrative estimate: {formatINR(budgetEstimate)}

@@ -5,16 +5,13 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
-import { ConfirmDialog } from '@/components/ui/Modal';
-import { removeKey, StorageKeys } from '@/lib/storage';
 export function Settings() {
-    const { profile, setProfile, locale, setLocale } = useApp();
+    const { profile, setProfile, locale, setLocale, authEnabled } = useApp();
     const { toast } = useToast();
     const [name, setName] = useState(profile.name);
     const [email, setEmail] = useState(profile.email);
     const [city, setCity] = useState(profile.city);
     const [errors, setErrors] = useState({});
-    const [clearOpen, setClearOpen] = useState(false);
     const onSave = (e) => {
         e.preventDefault();
         const next = {};
@@ -32,15 +29,7 @@ export function Settings() {
             city: city.trim() || '—',
             preferredLanguage: locale,
         });
-        toast('Profile saved', 'success');
-    };
-    const clearData = () => {
-        Object.values(StorageKeys).forEach((k) => removeKey(k));
-        removeKey(StorageKeys.favorites + ':templates');
-        removeKey(StorageKeys.favorites + ':decorators');
-        setClearOpen(false);
-        toast('Local data cleared — reloading…', 'info');
-        setTimeout(() => window.location.reload(), 600);
+        toast(authEnabled ? 'Profile saved to your account' : 'Demo change only — sign in to save your profile', authEnabled ? 'success' : 'info');
     };
     return (<div className="p-6 md:p-10 animate-fade-in max-w-xl mx-auto">
       <h1 className="font-display text-4xl md:text-[2.75rem] text-forest tracking-tight leading-none mb-2">
@@ -68,20 +57,15 @@ export function Settings() {
         </Card>
       </form>
 
-      <Card className="mt-6 border-red-200/60">
+      <Card className="mt-6">
         <CardHeader>
-          <h2 className="font-display text-xl text-forest">Data</h2>
+          <h2 className="font-display text-xl text-forest">Account data</h2>
         </CardHeader>
         <CardBody>
           <p className="text-sm text-charcoal/60 mb-4">
-            Clear all Decorly data from this browser&apos;s localStorage (designs, bookings, favorites).
+            {authEnabled ? 'Your saved data is stored in your Supabase account and loads when you sign in.' : 'You are viewing demo data. Sign in to save your profile, designs, bookings, and budget to Supabase.'}
           </p>
-          <Button variant="danger" onClick={() => setClearOpen(true)}>
-            Clear local data
-          </Button>
         </CardBody>
       </Card>
-
-      <ConfirmDialog open={clearOpen} title="Clear all local data?" message="This removes every Decorly key from localStorage and reloads the app. Cannot be undone." confirmLabel="Clear everything" danger onCancel={() => setClearOpen(false)} onConfirm={clearData}/>
     </div>);
 }

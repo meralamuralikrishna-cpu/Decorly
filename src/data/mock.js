@@ -480,7 +480,7 @@ export const DEMO_NOTIFICATIONS = [
     {
         id: 'n1',
         title: 'Welcome to Decorly',
-        body: 'Your designs stay on this device. No account or payment required.',
+        body: 'Your designs stay private to your account. No payments are processed.',
         read: false,
         createdAt: '2026-10-27T08:00:00.000Z',
     },

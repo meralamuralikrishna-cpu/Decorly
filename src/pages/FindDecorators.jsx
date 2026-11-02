@@ -85,7 +85,7 @@ export function FindDecorators() {
         });
         toast(linkedDesign
             ? `Inquiry saved with design “${linkedDesign.name}” (demo)`
-            : 'Inquiry saved locally (demo only)', 'success');
+            : 'Demo inquiry only — sign in to save it', 'info');
         setInquire(null);
         setEventDate('');
         setVenue('');

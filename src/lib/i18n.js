@@ -15,7 +15,7 @@ const dict = {
         browseTemplates: 'Browse Templates',
         newDesign: 'New design',
         heroTitle: 'Bring your celebration to life',
-        heroSubtitle: 'Compose floral arches, lighting, and stages in an elegant design studio — saved privately on this device.',
+        heroSubtitle: 'Compose floral arches, lighting, and stages in an elegant design studio — saved privately to your account.',
         recentDesigns: 'Recent designs',
         upcomingEvents: 'Upcoming events',
         budgetProgress: 'Budget progress',

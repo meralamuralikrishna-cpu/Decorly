@@ -27,28 +27,33 @@ export function ShareView() {
     const [body, setBody] = useState('');
     const [error, setError] = useState('');
     const [flash, setFlash] = useState(null);
-    const reload = useCallback(() => {
+    const reload = useCallback(async () => {
         if (!shareId) {
             setMissing(true);
             return;
         }
-        const found = getSharedDesign(shareId);
-        if (!found) {
+        try {
+          const found = await getSharedDesign(shareId);
+          if (!found) {
             setMissing(true);
             setShare(null);
             return;
+          }
+          setMissing(false);
+          setShare(found);
+        } catch {
+          setMissing(true);
+          setShare(null);
         }
-        setMissing(false);
-        setShare(found);
     }, [shareId]);
     useEffect(() => {
-        reload();
+        void reload();
     }, [reload]);
     const showFlash = (msg) => {
         setFlash(msg);
         window.setTimeout(() => setFlash(null), 2800);
     };
-    const onComment = (e) => {
+    const onComment = async (e) => {
         e.preventDefault();
         if (!shareId)
             return;
@@ -57,22 +62,31 @@ export function ShareView() {
             return;
         }
         setError('');
-        const next = addShareComment(shareId, author, body);
-        if (next) {
-            setShare(next);
-            setBody('');
-            showFlash('Comment saved on this device');
+        try {
+          const next = await addShareComment(shareId, author, body);
+          if (next) {
+              setShare(next);
+              setBody('');
+              showFlash('Comment saved to the shared design');
+          }
+        } catch {
+          setError('Could not save your comment. Please try again.');
         }
     };
-    const onStatus = (status) => {
+    const onStatus = async (status) => {
         if (!shareId)
             return;
-        const next = setShareStatus(shareId, status, author || undefined);
-        if (next) {
-            setShare(next);
-            showFlash(status === 'approved'
-                ? 'Look approved — designer will see this locally'
-                : 'Changes requested');
+        try {
+          const next = await setShareStatus(shareId, status, author || undefined);
+          if (next) {
+              setShare(next);
+              showFlash(status === 'approved'
+                  ? 'Look approved — designer can see your feedback'
+                  : 'Changes requested');
+          }
+        } catch {
+          setFlash('Could not save your feedback. Please try again.');
+          window.setTimeout(() => setFlash(null), 2800);
         }
     };
     if (missing) {
@@ -88,8 +102,7 @@ export function ShareView() {
             <BrandMark tone="ink" className="h-20 w-auto mx-auto opacity-40"/>
             <h1 className="font-display text-3xl text-forest tracking-tight">Share link not found</h1>
             <p className="text-sm text-charcoal/60 leading-relaxed">
-              Guest shares are stored in this browser only. Open the link on the same device
-              where it was created, or ask the designer to share again.
+              This share link is unavailable. Ask the designer to create a new link.
             </p>
             <Link to="/studio">
               <Button variant="gold">Open Design Studio</Button>
@@ -191,7 +204,7 @@ export function ShareView() {
                 Request changes
               </Button>
               <p className="text-[10px] text-charcoal/45 pt-1 leading-relaxed">
-                Feedback stays on this browser. Open Studio on the same device to continue editing.
+                Feedback is saved with this share link. Open Studio to continue editing.
               </p>
               <Link to={`/studio?design=${encodeURIComponent(share.designId)}`} className="block pt-1">
                 <Button variant="ghost" size="sm" className="w-full">

@@ -37,7 +37,7 @@ export function BudgetPlanner() {
             categories,
             updatedAt: new Date().toISOString(),
         });
-        toast(authEnabled ? 'Budget plan saved to your account' : 'Budget plan saved on this device', 'success');
+        toast(authEnabled ? 'Budget plan saved to your account' : 'Demo change only — sign in to save your budget', authEnabled ? 'success' : 'info');
     };
     return (<div className="p-6 md:p-10 animate-fade-in max-w-4xl mx-auto">
       <div className="flex flex-wrap items-end justify-between gap-4 mb-8">

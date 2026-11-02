@@ -1,5 +1,4 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { loadJSON, saveJSON, StorageKeys } from '@/lib/storage';
 import { DEMO_MOODBOARDS, DEMO_BOOKINGS, DEMO_BUDGET, DEMO_NOTIFICATIONS, DEFAULT_PROFILE, SEED_DESIGNS, } from '@/data/mock';
 import { supabase } from '@/lib/supabase';
 const AppContext = createContext(null);
@@ -17,25 +16,18 @@ export function AppProvider({ children }) {
         });
         return () => { alive = false; listener.subscription.unsubscribe(); };
     }, []);
-    const [locale, setLocaleState] = useState(() => loadJSON(StorageKeys.locale, 'en'));
-    const [sidebarCollapsed, setSidebarCollapsedState] = useState(() => loadJSON(StorageKeys.sidebarCollapsed, false));
+    const [locale, setLocaleState] = useState('en');
+    const [sidebarCollapsed, setSidebarCollapsedState] = useState(false);
     const [mobileNavOpen, setMobileNavOpen] = useState(false);
-    const [designs, setDesigns] = useState(() => {
-        const loaded = loadJSON(StorageKeys.designs, SEED_DESIGNS);
-        if (!loaded.length)
-            return SEED_DESIGNS;
-        const ids = new Set(loaded.map((d) => d.id));
-        const missing = SEED_DESIGNS.filter((s) => !ids.has(s.id));
-        return missing.length ? [...loaded, ...missing] : loaded;
-    });
-    const [moodboards, setMoodboards] = useState(() => loadJSON(StorageKeys.moodboards, DEMO_MOODBOARDS));
-    const [bookings, setBookings] = useState(() => loadJSON(StorageKeys.bookings, DEMO_BOOKINGS));
-    const [budget, setBudgetState] = useState(() => loadJSON(StorageKeys.budget, DEMO_BUDGET));
-    const [notifications, setNotifications] = useState(() => loadJSON(StorageKeys.notifications, DEMO_NOTIFICATIONS));
-    const [profile, setProfileState] = useState(() => loadJSON(StorageKeys.profile, DEFAULT_PROFILE));
-    const [templateFavorites, setTemplateFavorites] = useState(() => loadJSON(StorageKeys.favorites + ':templates', []));
-    const [decoratorFavorites, setDecoratorFavorites] = useState(() => loadJSON(StorageKeys.favorites + ':decorators', []));
-    const [activeDesignId, setActiveDesignIdState] = useState(() => loadJSON(StorageKeys.activeDesignId, null));
+    const [designs, setDesigns] = useState(SEED_DESIGNS);
+    const [moodboards, setMoodboards] = useState(DEMO_MOODBOARDS);
+    const [bookings, setBookings] = useState(DEMO_BOOKINGS);
+    const [budget, setBudgetState] = useState(DEMO_BUDGET);
+    const [notifications, setNotifications] = useState(DEMO_NOTIFICATIONS);
+    const [profile, setProfileState] = useState(DEFAULT_PROFILE);
+    const [templateFavorites, setTemplateFavorites] = useState([]);
+    const [decoratorFavorites, setDecoratorFavorites] = useState([]);
+    const [activeDesignId, setActiveDesignIdState] = useState(null);
     useEffect(() => {
         if (!supabase || !user) { setCloudReady(false); return; }
         let alive = true;
@@ -46,17 +38,16 @@ export function AppProvider({ children }) {
             if (error) { console.error('Could not load account data', error); setCloudReady(true); return; }
             const p = data?.payload;
             if (p) {
-                if (p.designs) setDesigns(p.designs);
-                if (p.moodboards) setMoodboards(p.moodboards);
-                if (p.bookings) setBookings(p.bookings);
-                if (p.budget) setBudgetState(p.budget);
-                if (p.profile) setProfileState({ ...DEFAULT_PROFILE, ...p.profile, email: user.email ?? p.profile.email });
-                else setProfileState((old) => ({ ...old, email: user.email ?? old.email }));
-                if (p.templateFavorites) setTemplateFavorites(p.templateFavorites);
-                if (p.decoratorFavorites) setDecoratorFavorites(p.decoratorFavorites);
-                if (p.locale) setLocaleState(p.locale);
-                if (p.notifications) setNotifications(p.notifications);
-                if (p.activeDesignId) setActiveDesignIdState(p.activeDesignId);
+                setDesigns(p.designs ?? SEED_DESIGNS);
+                setMoodboards(p.moodboards ?? DEMO_MOODBOARDS);
+                setBookings(p.bookings ?? DEMO_BOOKINGS);
+                setBudgetState(p.budget ?? DEMO_BUDGET);
+                setProfileState({ ...DEFAULT_PROFILE, ...p.profile, email: user.email ?? p.profile?.email ?? DEFAULT_PROFILE.email });
+                setTemplateFavorites(p.templateFavorites ?? []);
+                setDecoratorFavorites(p.decoratorFavorites ?? []);
+                setLocaleState(p.locale ?? 'en');
+                setNotifications(p.notifications ?? DEMO_NOTIFICATIONS);
+                setActiveDesignIdState(p.activeDesignId ?? null);
             } else {
                 setDesigns(SEED_DESIGNS);
                 setMoodboards(DEMO_MOODBOARDS);
@@ -72,17 +63,6 @@ export function AppProvider({ children }) {
         })();
         return () => { alive = false; };
     }, [user?.id]);
-    useEffect(() => saveJSON(StorageKeys.locale, locale), [locale]);
-    useEffect(() => saveJSON(StorageKeys.sidebarCollapsed, sidebarCollapsed), [sidebarCollapsed]);
-    useEffect(() => saveJSON(StorageKeys.designs, designs), [designs]);
-    useEffect(() => saveJSON(StorageKeys.moodboards, moodboards), [moodboards]);
-    useEffect(() => saveJSON(StorageKeys.bookings, bookings), [bookings]);
-    useEffect(() => saveJSON(StorageKeys.budget, budget), [budget]);
-    useEffect(() => saveJSON(StorageKeys.notifications, notifications), [notifications]);
-    useEffect(() => saveJSON(StorageKeys.profile, profile), [profile]);
-    useEffect(() => saveJSON(StorageKeys.favorites + ':templates', templateFavorites), [templateFavorites]);
-    useEffect(() => saveJSON(StorageKeys.favorites + ':decorators', decoratorFavorites), [decoratorFavorites]);
-    useEffect(() => saveJSON(StorageKeys.activeDesignId, activeDesignId), [activeDesignId]);
     useEffect(() => {
         if (!supabase || !user || !cloudReady) return;
         const payload = { designs, moodboards, bookings, budget, profile, templateFavorites, decoratorFavorites, locale, notifications, activeDesignId };
