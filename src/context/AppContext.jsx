@@ -93,10 +93,12 @@ export function AppProvider({ children }) {
         return () => clearTimeout(timer);
     }, [user?.id, cloudReady, designs, moodboards, bookings, budget, profile, templateFavorites, decoratorFavorites, locale, notifications, activeDesignId]);
     const signIn = useCallback(async (email, password) => {
+        if (!supabase) return { error: 'Account sign-in is unavailable. Configure the Supabase URL and publishable key, then restart the app.' };
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         return { session: data.session, error: error?.message };
     }, []);
     const signUp = useCallback(async (email, password, name) => {
+        if (!supabase) return { error: 'Account creation is unavailable. Configure the Supabase URL and publishable key, then restart the app.' };
         const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { name } } });
         return { session: data.session, error: error?.message };
     }, []);

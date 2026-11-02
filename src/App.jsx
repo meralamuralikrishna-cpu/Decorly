@@ -12,12 +12,14 @@ import { FindDecorators } from '@/pages/FindDecorators';
 import { Bookings } from '@/pages/Bookings';
 import { Settings } from '@/pages/Settings';
 import { ShareView } from '@/pages/ShareView';
+import { Auth } from '@/pages/Auth';
 export default function App() {
     return (<AppProvider>
       <ToastProvider>
         <BrowserRouter>
           <Routes>
             <Route path="share/:shareId" element={<ShareView />}/>
+            <Route path="login" element={<Auth />}/>
             <Route element={<AppShell />}>
               <Route index element={<Overview />}/>
               <Route path="studio" element={<DesignStudio />}/>

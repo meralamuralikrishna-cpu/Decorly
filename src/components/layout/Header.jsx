@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
-import { Bell, Menu, User } from 'lucide-react';
+import { Bell, Menu, User, LogIn } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useApp } from '@/context/AppContext';
 import { t } from '@/lib/i18n';
 import { Button } from '@/components/ui/Button';
 import { cn, formatDate } from '@/lib/utils';
 export function Header() {
-    const { locale, setLocale, setMobileNavOpen, notifications, markNotificationRead, markAllNotificationsRead, profile, } = useApp();
+    const { locale, setLocale, setMobileNavOpen, notifications, markNotificationRead, markAllNotificationsRead, profile, authEnabled, user } = useApp();
     const [notifOpen, setNotifOpen] = useState(false);
     const [profileOpen, setProfileOpen] = useState(false);
     const notifRef = useRef(null);
@@ -32,6 +33,7 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-2">
+        {!authEnabled && !user && <Link to="/login" className="inline-flex h-9 items-center gap-2 rounded-xl bg-forest px-3 text-xs font-semibold text-ivory hover:bg-forest/90"><LogIn className="h-4 w-4"/> Sign in</Link>}
         <div role="group" aria-label={t(locale, 'language')} className="flex rounded-xl overflow-hidden bg-white/70 border border-sage/25 shadow-sm">
           <button type="button" className={cn('px-3 h-9 text-xs font-semibold tracking-wide transition', locale === 'en' ? 'bg-forest text-ivory' : 'text-charcoal/65 hover:bg-sage/15')} onClick={() => setLocale('en')} aria-pressed={locale === 'en'}>
             EN
