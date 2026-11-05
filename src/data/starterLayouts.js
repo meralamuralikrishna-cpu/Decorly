@@ -3,6 +3,7 @@ export const STARTER_TEMPLATES = [
     {
         id: 'tpl-blush-arch',
         name: 'Blush Arch Ceremony',
+        image: '/images/templates/haldi-florals.jpg',
         themeId: 'blush-romance',
         style: 'Romantic',
         eventType: 'Wedding',
@@ -21,6 +22,7 @@ export const STARTER_TEMPLATES = [
     {
         id: 'tpl-sage-garden',
         name: 'Sage Garden Reception',
+        image: '/images/templates/garden-reception.jpg',
         themeId: 'sage-garden',
         style: 'Garden',
         eventType: 'Reception',
@@ -39,6 +41,7 @@ export const STARTER_TEMPLATES = [
     {
         id: 'tpl-royal-gold',
         name: 'Royal Gold Mandap',
+        image: '/images/templates/gold-mandap.jpg',
         themeId: 'royal-gold',
         style: 'Regal',
         eventType: 'Wedding',
@@ -57,6 +60,7 @@ export const STARTER_TEMPLATES = [
     {
         id: 'tpl-marigold',
         name: 'Marigold Courtyard',
+        image: '/images/templates/marigold-celebration.jpg',
         themeId: 'traditional-marigold',
         style: 'Festive',
         eventType: 'Haldi',
@@ -75,6 +79,7 @@ export const STARTER_TEMPLATES = [
     {
         id: 'tpl-ivory',
         name: 'Ivory Elegance Dinner',
+        image: '/images/templates/wedding-table.jpg',
         themeId: 'ivory-elegance',
         style: 'Minimal',
         eventType: 'Reception',
@@ -93,6 +98,7 @@ export const STARTER_TEMPLATES = [
     {
         id: 'tpl-valentines',
         name: "Valentine's Sweetheart Stage",
+        image: '/images/templates/blush-wedding.jpg',
         themeId: 'blush-romance',
         style: 'Romantic',
         eventType: "Valentine's Day",
@@ -122,6 +128,7 @@ export const STARTER_TEMPLATES = [
     {
         id: 'tpl-valentine-dinner',
         name: "Valentine's Candlelit Dinner",
+        image: '/images/templates/wedding-table.jpg',
         themeId: 'blush-romance',
         style: 'Intimate',
         eventType: "Valentine's Day",
@@ -148,6 +155,7 @@ export const STARTER_TEMPLATES = [
     {
         id: 'tpl-engagement',
         name: 'Engagement Ring Night',
+        image: '/images/templates/blush-wedding.jpg',
         themeId: 'royal-gold',
         style: 'Regal',
         eventType: 'Engagement',
@@ -176,6 +184,7 @@ export const STARTER_TEMPLATES = [
     {
         id: 'tpl-anniversary',
         name: 'Silver Anniversary Soirée',
+        image: '/images/templates/garden-reception.jpg',
         themeId: 'ivory-elegance',
         style: 'Elegant',
         eventType: 'Anniversary',
@@ -203,6 +212,7 @@ export const STARTER_TEMPLATES = [
     {
         id: 'tpl-birthday',
         name: 'Birthday Balloon Bash',
+        image: '/images/templates/birthday-party.jpg',
         themeId: 'blush-romance',
         style: 'Festive',
         eventType: 'Birthday',
@@ -230,6 +240,7 @@ export const STARTER_TEMPLATES = [
     {
         id: 'tpl-baby-shower',
         name: 'Soft Baby Shower Garden',
+        image: '/images/templates/haldi-florals.jpg',
         themeId: 'sage-garden',
         style: 'Soft',
         eventType: 'Baby Shower',
@@ -258,6 +269,7 @@ export const STARTER_TEMPLATES = [
     {
         id: 'tpl-mehendi',
         name: 'Mehendi Courtyard Bloom',
+        image: '/images/templates/marigold-celebration.jpg',
         themeId: 'traditional-marigold',
         style: 'Festive',
         eventType: 'Mehendi',
@@ -286,6 +298,7 @@ export const STARTER_TEMPLATES = [
     {
         id: 'tpl-sangeet',
         name: 'Sangeet Night Lights',
+        image: '/images/templates/celebration-lights.jpg',
         themeId: 'royal-gold',
         style: 'Party',
         eventType: 'Sangeet',
@@ -314,6 +327,7 @@ export const STARTER_TEMPLATES = [
     {
         id: 'tpl-diwali',
         name: 'Diwali Glow Courtyard',
+        image: '/images/templates/gold-mandap.jpg',
         themeId: 'traditional-marigold',
         style: 'Festive',
         eventType: 'Diwali',
