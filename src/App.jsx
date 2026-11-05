@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider } from '@/context/AppContext';
 import { ToastProvider } from '@/components/ui/Toast';
 import { AppShell } from '@/components/layout/AppShell';
@@ -28,6 +28,7 @@ export default function App() {
               <Route path="moodboards" element={<Moodboards />}/>
               <Route path="decorators" element={<FindDecorators />}/>
               <Route path="bookings" element={<Bookings />}/>
+              <Route path="admin" element={<Navigate to="/admin/bookings" replace />}/>
               <Route path="admin/bookings" element={<AdminBookings />}/>
               <Route path="settings" element={<Settings />}/>
             </Route>
