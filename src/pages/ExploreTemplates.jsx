@@ -1,16 +1,15 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Search } from 'lucide-react';
-import { DEMO_TEMPLATES } from '@/data/mock';
+import { STARTER_TEMPLATES } from '@/data/starterLayouts';
 import { getTheme } from '@/data/themes';
 import { useApp } from '@/context/AppContext';
 import { Card, CardBody } from '@/components/ui/Card';
-import { DemoBadge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { formatINR, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 export function ExploreTemplates() {
     const { templateFavorites, toggleTemplateFavorite, setActiveDesignId } = useApp();
     const [q, setQ] = useState('');
@@ -18,7 +17,7 @@ export function ExploreTemplates() {
     const [theme, setTheme] = useState('all');
     const [favOnly, setFavOnly] = useState(false);
     const filtered = useMemo(() => {
-        return DEMO_TEMPLATES.filter((t) => {
+        return STARTER_TEMPLATES.filter((t) => {
             if (favOnly && !templateFavorites.includes(t.id))
                 return false;
             if (eventType !== 'all' && t.eventType !== eventType)
@@ -34,7 +33,7 @@ export function ExploreTemplates() {
         });
     }, [q, eventType, theme, favOnly, templateFavorites]);
     return (<div className="p-6 md:p-10 animate-fade-in max-w-6xl mx-auto">
-      <PageHeader kicker="Inspiration" title="Explore Templates" description="Curated starting points. All items are labelled demo data." action={<DemoBadge />}/>
+      <PageHeader kicker="Inspiration" title="Starter layouts" description="Editable layouts to help you begin a design." />
 
       <div className="flex flex-wrap gap-3 mb-8 items-end">
         <div className="flex-1 min-w-[200px] relative">
@@ -77,19 +76,16 @@ export function ExploreTemplates() {
                 <div className="h-36 relative" style={{
                         background: `linear-gradient(160deg, ${th.palette.backdrop}, ${th.palette.primary} 60%, ${th.palette.platform})`,
                     }}>
-                  <button type="button" className="absolute top-3 right-3 h-9 w-9 rounded-full bg-white/80 flex items-center justify-center hover:bg-white transition" aria-label={fav ? 'Remove from favorites' : 'Add to favorites'} onClick={() => toggleTemplateFavorite(tpl.id)}>
+                  <img src={tpl.image} alt={tpl.name} loading="lazy" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }}/>
+                  <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/50 to-transparent"/>
+                  <button type="button" className="absolute z-10 top-3 right-3 h-9 w-9 rounded-full bg-white/80 flex items-center justify-center hover:bg-white transition" aria-label={fav ? 'Remove from favorites' : 'Add to favorites'} onClick={() => toggleTemplateFavorite(tpl.id)}>
                     <Heart className={cn('h-4 w-4 text-forest', fav && 'fill-blush text-blush')}/>
                   </button>
-                  <div className="absolute bottom-3 left-3">
-                    <DemoBadge />
-                  </div>
                 </div>
                 <CardBody className="pt-4 flex-1 flex flex-col">
                   <p className="font-display text-xl text-forest">{tpl.name}</p>
                   <p className="text-xs text-charcoal/55 mt-1 flex-1">{tpl.description}</p>
-                  <p className="text-xs text-champagne mt-3">
-                    {formatINR(tpl.budgetRange[0])} – {formatINR(tpl.budgetRange[1])} · {tpl.style}
-                  </p>
+                  <p className="text-xs text-champagne mt-3">{tpl.style}</p>
                   <div className="flex flex-wrap gap-1 mt-2 mb-4">
                     {tpl.tags.map((tag) => (<span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-sage/25 text-forest">
                         {tag}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { LIBRARY_ITEMS, CATEGORY_LABELS } from '@/data/library';
-import { cn, formatINR } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { ElementVisual } from './ElementVisual';
 const TABS = [
     'flowers',
@@ -65,7 +65,6 @@ export function ElementLibrary({ onAdd }) {
                     {item.name}
                   </p>
                   <p className="text-[10px] text-charcoal/50 truncate">{item.description}</p>
-                  <p className="text-[10px] text-champagne mt-0.5">{formatINR(item.baseCost)}</p>
                 </div>
               </div>
             </button>

@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, LayoutTemplate, Palette, FolderHeart, Images, Wallet, Search, CalendarDays, Settings, ChevronLeft, ChevronRight, } from 'lucide-react';
+import { LayoutDashboard, LayoutTemplate, Palette, FolderHeart, Images, Search, CalendarDays, Settings, ShieldCheck, ChevronLeft, ChevronRight, } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { t } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
@@ -11,13 +11,13 @@ const NAV = [
     { id: 'studio', path: '/studio', icon: Palette },
     { id: 'designs', path: '/designs', icon: FolderHeart },
     { id: 'moodboards', path: '/moodboards', icon: Images },
-    { id: 'budget', path: '/budget', icon: Wallet },
     { id: 'decorators', path: '/decorators', icon: Search },
     { id: 'bookings', path: '/bookings', icon: CalendarDays },
     { id: 'settings', path: '/settings', icon: Settings },
 ];
 export function Sidebar() {
-    const { locale, sidebarCollapsed, setSidebarCollapsed, mobileNavOpen, setMobileNavOpen } = useApp();
+    const { locale, sidebarCollapsed, setSidebarCollapsed, mobileNavOpen, setMobileNavOpen, isAdmin } = useApp();
+    const navItems = isAdmin ? [...NAV, { id: 'adminBookings', path: '/admin/bookings', icon: ShieldCheck }] : NAV;
     const content = (<div className="flex flex-col h-full relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 opacity-50" style={{
             backgroundImage: 'radial-gradient(ellipse 90% 55% at 0% 0%, rgba(168,91,95,0.4), transparent 55%), radial-gradient(ellipse 70% 45% at 100% 100%, rgba(126,154,140,0.3), transparent 50%)',
@@ -37,7 +37,7 @@ export function Sidebar() {
       </div>
 
       <nav className="relative flex-1 overflow-y-auto py-4 px-2 space-y-0.5" aria-label="Main">
-        {NAV.map(({ id, path, icon: Icon }) => (<NavLink key={id} to={path} end={path === '/'} onClick={() => setMobileNavOpen(false)} className={({ isActive }) => cn('group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-200', sidebarCollapsed && 'justify-center px-2', isActive
+        {navItems.map(({ id, path, icon: Icon }) => (<NavLink key={id} to={path} end={path === '/'} onClick={() => setMobileNavOpen(false)} className={({ isActive }) => cn('group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-200', sidebarCollapsed && 'justify-center px-2', isActive
                 ? 'bg-white/12 text-ivory shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]'
                 : 'text-sage hover:bg-white/8 hover:text-ivory')} title={t(locale, id)}>
             <Icon className="h-4.5 w-4.5 shrink-0 transition-transform duration-200 group-hover:scale-105" aria-hidden/>

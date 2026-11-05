@@ -1,9 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
 import { DEFAULT_SETTINGS, getTheme, THEME_PRESETS } from '@/data/themes';
-import { DEMO_TEMPLATES } from '@/data/mock';
-import { applyDesignToBudget, estimateBudget } from '@/lib/budget';
+import { STARTER_TEMPLATES } from '@/data/starterLayouts';
 import { exportNodeAsPng, nextPaint } from '@/lib/exportPng';
 import { createSharedDesign, DEFAULT_VENUE_PLAN, shareUrl } from '@/lib/share';
 import { useApp } from '@/context/AppContext';
@@ -17,16 +16,15 @@ import { MobileLibrary } from '@/components/studio/MobileLibrary';
 import { DesignCanvas, CANVAS_W, CANVAS_H } from '@/components/studio/DesignCanvas';
 import { PropertiesPanel } from '@/components/studio/PropertiesPanel';
 import { categoryDefaultSize } from '@/components/studio/ElementVisual';
-import { clamp, formatINR } from '@/lib/utils';
+import { clamp } from '@/lib/utils';
 const EMPTY = {
     elements: [],
     settings: { ...DEFAULT_SETTINGS },
     venuePlan: DEFAULT_VENUE_PLAN(),
 };
 export function DesignStudio() {
-    const { designs, saveDesign, activeDesignId, setActiveDesignId, budget, setBudget, canSaveData } = useApp();
+    const { designs, saveDesign, activeDesignId, setActiveDesignId, canSaveData } = useApp();
     const { toast } = useToast();
-    const navigate = useNavigate();
     const [params] = useSearchParams();
     const { present, set, undo, redo, reset, canUndo, canRedo, commitSnapshot } = useUndoRedo(EMPTY);
     const [selectedId, setSelectedId] = useState(null);
@@ -50,7 +48,7 @@ export function DesignStudio() {
         const themeParam = params.get('theme');
         const loadId = params.get('design') ?? activeDesignId;
         if (templateId) {
-            const tpl = DEMO_TEMPLATES.find((t) => t.id === templateId);
+            const tpl = STARTER_TEMPLATES.find((t) => t.id === templateId);
             if (tpl) {
                 const els = tpl.elements.map((el) => ({ ...el, id: uuid() }));
                 reset({
@@ -96,7 +94,7 @@ export function DesignStudio() {
                 return;
             }
         }
-        const starter = DEMO_TEMPLATES[0];
+        const starter = STARTER_TEMPLATES[0];
         reset({
             elements: starter.elements.map((el) => ({ ...el, id: uuid() })),
             settings: { ...starter.settings },
@@ -145,7 +143,6 @@ export function DesignStudio() {
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
     }, [undo, redo, selectedId, set]);
-    const budgetEstimate = useMemo(() => estimateBudget(present.elements, present.settings), [present.elements, present.settings]);
     const selected = present.elements.find((e) => e.id === selectedId) ?? null;
     const addItem = useCallback((item) => {
         const size = categoryDefaultSize(item.category);
@@ -196,7 +193,6 @@ export function DesignStudio() {
             thumbnailTheme: present.settings.themeId,
             elements: present.elements,
             settings: present.settings,
-            estimatedBudget: budgetEstimate,
             isFavorite: existing?.isFavorite ?? false,
             eventDate: existing?.eventDate,
             notes: existing?.notes,
@@ -208,7 +204,7 @@ export function DesignStudio() {
         saveDesign(design);
         setActiveDesignId(design.id);
         savedSnapshot.current = currentSnapshot;
-        toast(canSaveData ? 'Design saved to your account' : 'Demo change only — sign in to save your design', canSaveData ? 'success' : 'info');
+        toast(canSaveData ? 'Design saved to your account' : 'Changes are temporary until you sign in to save your design', canSaveData ? 'success' : 'info');
     };
     const handleExportJson = () => {
         const payload = {
@@ -216,9 +212,7 @@ export function DesignStudio() {
             settings: present.settings,
             venuePlan: present.venuePlan,
             elements: present.elements,
-            illustrativeEstimate: budgetEstimate,
             exportedAt: new Date().toISOString(),
-            note: 'Decorly demo export — illustrative only, no payment data.',
         };
         const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -263,7 +257,6 @@ export function DesignStudio() {
                 elements: design.elements,
                 settings: design.settings,
                 venuePlan: design.venuePlan,
-                estimatedBudget: design.estimatedBudget,
             });
             const url = shareUrl(share.id);
             setShareLink(url);
@@ -272,20 +265,6 @@ export function DesignStudio() {
         } catch (error) {
             toast(error instanceof Error ? error.message : 'Could not create share link. Check the database setup and try again.', 'error');
         }
-    };
-    const handleApplyToBudget = () => {
-        const next = applyDesignToBudget(budget, present.elements, present.settings, designName.trim() || 'Studio design');
-        setBudget(next);
-        handleSave();
-        toast('Design estimate applied to Budget Planner', 'success');
-        navigate('/budget');
-    };
-    const handleRequestQuote = () => {
-        const design = buildDesign();
-        saveDesign(design);
-        setActiveDesignId(design.id);
-        navigate(`/decorators?design=${encodeURIComponent(design.id)}&estimate=${design.estimatedBudget}`);
-        toast('Pick a decorator to request a quote with this design', 'info');
     };
     return (<div className="flex flex-col h-[calc(100vh-4rem)]">
       <StudioToolbar canUndo={canUndo} canRedo={canRedo} zoom={zoom} floorPlanMode={present.venuePlan.enabled} saveStatus={isDirty ? 'Unsaved changes' : 'Saved'} onUndo={undo} onRedo={redo} onZoomIn={() => setZoom((z) => clamp(z + 0.1, 0.5, 1.5))} onZoomOut={() => setZoom((z) => clamp(z - 0.1, 0.5, 1.5))} onReset={() => setResetOpen(true)} onPreview={() => setPreviewOpen(true)} onExportJson={handleExportJson} onExportPng={() => void handleExportPng()} onSave={handleSave} onShareGuest={handleShareGuest} onToggleFloorPlan={() => {
@@ -324,7 +303,7 @@ export function DesignStudio() {
                 elements: s.elements.filter((e) => e.id !== selectedId),
             }));
             setSelectedId(null);
-        }} estimatedBudget={budgetEstimate} venuePlan={present.venuePlan} onVenuePlanChange={handleVenuePlan} onApplyToBudget={handleApplyToBudget} onRequestQuote={handleRequestQuote}/>
+        }} venuePlan={present.venuePlan} onVenuePlanChange={handleVenuePlan}/>
         </div>
       </div>
 
@@ -333,7 +312,7 @@ export function DesignStudio() {
       </div>
 
       <ConfirmDialog open={resetOpen} title="Reset canvas?" message="This clears all elements and restores the default Blush Romance starter. Undo history will reset." confirmLabel="Reset" danger onCancel={() => setResetOpen(false)} onConfirm={() => {
-            const starter = DEMO_TEMPLATES[0];
+            const starter = STARTER_TEMPLATES[0];
             reset({
                 elements: starter.elements.map((el) => ({ ...el, id: uuid() })),
                 settings: { ...starter.settings },
@@ -364,9 +343,6 @@ export function DesignStudio() {
         <p className="text-sm text-charcoal/70 mb-3 leading-relaxed">
           Anyone with this link (on this browser / device) can view a read-only snapshot, leave
           comments, and approve the look. The share and feedback are stored in Supabase.
-        </p>
-        <p className="text-xs text-champagne mb-2">
-          Illustrative estimate: {formatINR(budgetEstimate)}
         </p>
         <pre className="text-xs bg-sage/10 p-3 rounded-xl whitespace-pre-wrap break-all">
           {shareLink}

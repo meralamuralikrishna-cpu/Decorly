@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { THEME_PRESETS } from '@/data/themes';
-import { formatINR, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
-import { Trash2, Wallet, MessageSquareQuote, Upload, X } from 'lucide-react';
+import { Trash2, Upload, X } from 'lucide-react';
 const STYLES = [
     { value: 'cascade', label: 'Cascade' },
     { value: 'symmetrical', label: 'Symmetrical' },
     { value: 'asymmetric', label: 'Asymmetric' },
     { value: 'minimal', label: 'Minimal' },
 ];
-export function PropertiesPanel({ settings, onSettingsChange, selected, onUpdateSelected, onDeleteSelected, estimatedBudget, venuePlan, onVenuePlanChange, onApplyToBudget, onRequestQuote, }) {
+export function PropertiesPanel({ settings, onSettingsChange, selected, onUpdateSelected, onDeleteSelected, venuePlan, onVenuePlanChange, }) {
     const [uploadHint, setUploadHint] = useState(null);
     const onUpload = (file) => {
         setUploadHint(null);
@@ -170,23 +170,6 @@ export function PropertiesPanel({ settings, onSettingsChange, selected, onUpdate
             </Button>
           </section>)}
 
-        <section className="border-t border-sage/30 pt-4 space-y-3">
-          <p className="text-[10px] uppercase tracking-wider text-champagne font-medium mb-1">
-            Illustrative estimate
-          </p>
-          <p className="font-display text-3xl text-forest">{formatINR(estimatedBudget)}</p>
-          <p className="text-[10px] text-charcoal/45 leading-relaxed">
-            Deterministic mock figure based on elements and settings. Not a real quote or payment.
-          </p>
-          <Button variant="secondary" size="sm" className="w-full" onClick={onApplyToBudget}>
-            <Wallet className="h-3.5 w-3.5"/>
-            Apply to budget
-          </Button>
-          <Button variant="gold" size="sm" className="w-full" onClick={onRequestQuote}>
-            <MessageSquareQuote className="h-3.5 w-3.5"/>
-            Request quote
-          </Button>
-        </section>
       </div>
     </aside>);
 }

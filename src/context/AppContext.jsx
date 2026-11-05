@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { DEMO_MOODBOARDS, DEMO_BOOKINGS, DEMO_BUDGET, DEMO_NOTIFICATIONS, DEFAULT_PROFILE, SEED_DESIGNS, } from '@/data/mock';
+import { DEFAULT_PROFILE } from '@/data/starterLayouts';
 import { supabase } from '@/lib/supabase';
+import { createBookingRequest, getBookingRequests, removeBookingRequest, updateBookingRequestStatus } from '@/lib/bookingRequests';
 const AppContext = createContext(null);
 export function AppProvider({ children }) {
     const [user, setUser] = useState(null);
@@ -18,13 +19,17 @@ export function AppProvider({ children }) {
         return () => { alive = false; listener.subscription.unsubscribe(); };
     }, []);
     const [locale, setLocaleState] = useState('en');
+    useEffect(() => {
+        if (typeof document !== 'undefined') {
+            document.documentElement.lang = locale;
+        }
+    }, [locale]);
     const [sidebarCollapsed, setSidebarCollapsedState] = useState(false);
     const [mobileNavOpen, setMobileNavOpen] = useState(false);
-    const [designs, setDesigns] = useState(SEED_DESIGNS);
-    const [moodboards, setMoodboards] = useState(DEMO_MOODBOARDS);
-    const [bookings, setBookings] = useState(DEMO_BOOKINGS);
-    const [budget, setBudgetState] = useState(DEMO_BUDGET);
-    const [notifications, setNotifications] = useState(DEMO_NOTIFICATIONS);
+    const [designs, setDesigns] = useState([]);
+    const [moodboards, setMoodboards] = useState([]);
+    const [bookings, setBookings] = useState([]);
+    const [notifications, setNotifications] = useState([]);
     const [profile, setProfileState] = useState(DEFAULT_PROFILE);
     const [templateFavorites, setTemplateFavorites] = useState([]);
     const [decoratorFavorites, setDecoratorFavorites] = useState([]);
@@ -36,25 +41,27 @@ export function AppProvider({ children }) {
         (async () => {
             const { data, error } = await supabase.from('user_data').select('payload').eq('user_id', user.id).maybeSingle();
             if (!alive) return;
-            if (error) { console.error('Could not load account data', error); setCloudReady(true); return; }
+            if (error) console.error('Could not load account data', error);
+            const bookingRows = await getBookingRequests().catch((bookingError) => {
+                console.error('Could not load booking requests', bookingError);
+                return [];
+            });
+            if (!alive) return;
+            setBookings(bookingRows);
             const p = data?.payload;
             if (p) {
-                setDesigns(p.designs ?? SEED_DESIGNS);
-                setMoodboards(p.moodboards ?? DEMO_MOODBOARDS);
-                setBookings(p.bookings ?? DEMO_BOOKINGS);
-                setBudgetState(p.budget ?? DEMO_BUDGET);
+                setDesigns((p.designs ?? []).filter((item) => !item.isDemo && !item.id?.startsWith('design-seed-')));
+                setMoodboards((p.moodboards ?? []).filter((item) => !item.isDemo));
                 setProfileState({ ...DEFAULT_PROFILE, ...p.profile, email: user.email ?? p.profile?.email ?? DEFAULT_PROFILE.email });
                 setTemplateFavorites(p.templateFavorites ?? []);
                 setDecoratorFavorites(p.decoratorFavorites ?? []);
                 setLocaleState(p.locale ?? 'en');
-                setNotifications(p.notifications ?? DEMO_NOTIFICATIONS);
+                setNotifications((p.notifications ?? []).filter((item) => !['n1', 'n2', 'n3'].includes(item.id)));
                 setActiveDesignIdState(p.activeDesignId ?? null);
             } else {
-                setDesigns(SEED_DESIGNS);
-                setMoodboards(DEMO_MOODBOARDS);
-                setBookings(DEMO_BOOKINGS);
-                setBudgetState(DEMO_BUDGET);
-                setNotifications(DEMO_NOTIFICATIONS);
+                setDesigns([]);
+                setMoodboards([]);
+                setNotifications([]);
                 setTemplateFavorites([]);
                 setDecoratorFavorites([]);
                 setActiveDesignIdState(null);
@@ -66,13 +73,13 @@ export function AppProvider({ children }) {
     }, [user?.id]);
     useEffect(() => {
         if (!supabase || !user || !cloudReady) return;
-        const payload = { designs, moodboards, bookings, budget, profile, templateFavorites, decoratorFavorites, locale, notifications, activeDesignId };
+        const payload = { designs, moodboards, profile, templateFavorites, decoratorFavorites, locale, notifications, activeDesignId };
         const timer = setTimeout(async () => {
             const { error } = await supabase.from('user_data').upsert({ user_id: user.id, payload, updated_at: new Date().toISOString() });
             if (error) console.error('Could not save account data', error);
         }, 500);
         return () => clearTimeout(timer);
-    }, [user?.id, cloudReady, designs, moodboards, bookings, budget, profile, templateFavorites, decoratorFavorites, locale, notifications, activeDesignId]);
+    }, [user?.id, cloudReady, designs, moodboards, profile, templateFavorites, decoratorFavorites, locale, notifications, activeDesignId]);
     const signIn = useCallback(async (email, password) => {
         if (!supabase) return { error: 'Account sign-in is unavailable. Configure the Supabase URL and publishable key, then restart the app.' };
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -89,6 +96,11 @@ export function AppProvider({ children }) {
             },
         });
         return { session: data.session, error: error?.message };
+    }, []);
+    const resendConfirmation = useCallback(async (email) => {
+        if (!supabase) return { error: 'Account access is unavailable because Supabase is not configured.' };
+        const { error } = await supabase.auth.resend({ type: 'signup', email });
+        return { error: error?.message };
     }, []);
     const signOut = useCallback(async () => { if (supabase) await supabase.auth.signOut(); }, []);
     const enterOfflineDemo = useCallback(() => setOfflineDemo(true), []);
@@ -132,21 +144,20 @@ export function AppProvider({ children }) {
     const toggleMoodboardFavorite = useCallback((id) => {
         setMoodboards((prev) => prev.map((m) => (m.id === id ? { ...m, isFavorite: !m.isFavorite } : m)));
     }, []);
-    const saveBooking = useCallback((b) => {
-        setBookings((prev) => {
-            const idx = prev.findIndex((x) => x.id === b.id);
-            if (idx >= 0) {
-                const next = [...prev];
-                next[idx] = b;
-                return next;
-            }
-            return [b, ...prev];
-        });
+    const saveBooking = useCallback(async (booking) => {
+        const saved = await createBookingRequest(booking);
+        setBookings((prev) => [saved, ...prev]);
+        return saved;
     }, []);
-    const deleteBooking = useCallback((id) => {
+    const setBookingStatus = useCallback(async (id, status) => {
+        const updated = await updateBookingRequestStatus(id, status);
+        setBookings((prev) => prev.map((booking) => booking.id === id ? updated : booking));
+        return updated;
+    }, []);
+    const deleteBooking = useCallback(async (id) => {
+        await removeBookingRequest(id);
         setBookings((prev) => prev.filter((b) => b.id !== id));
     }, []);
-    const setBudget = useCallback((b) => setBudgetState(b), []);
     const markNotificationRead = useCallback((id) => {
         setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
     }, []);
@@ -178,9 +189,8 @@ export function AppProvider({ children }) {
         toggleMoodboardFavorite,
         bookings,
         saveBooking,
+        setBookingStatus,
         deleteBooking,
-        budget,
-        setBudget,
         notifications,
         markNotificationRead,
         markAllNotificationsRead,
@@ -193,6 +203,7 @@ export function AppProvider({ children }) {
         activeDesignId,
         setActiveDesignId,
         user,
+        isAdmin: user?.app_metadata?.role === 'admin',
         authReady,
         cloudReady,
         authEnabled: !!supabase,
@@ -202,6 +213,7 @@ export function AppProvider({ children }) {
         leaveOfflineDemo,
         signIn,
         signUp,
+        resendConfirmation,
         signOut,
     }), [
         locale,
@@ -219,9 +231,8 @@ export function AppProvider({ children }) {
         toggleMoodboardFavorite,
         bookings,
         saveBooking,
+        setBookingStatus,
         deleteBooking,
-        budget,
-        setBudget,
         notifications,
         markNotificationRead,
         markAllNotificationsRead,
@@ -241,6 +252,7 @@ export function AppProvider({ children }) {
         leaveOfflineDemo,
         signIn,
         signUp,
+        resendConfirmation,
         signOut,
     ]);
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

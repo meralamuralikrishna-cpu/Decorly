@@ -7,9 +7,9 @@ import { DesignStudio } from '@/pages/DesignStudio';
 import { ExploreTemplates } from '@/pages/ExploreTemplates';
 import { MyDesigns } from '@/pages/MyDesigns';
 import { Moodboards } from '@/pages/Moodboards';
-import { BudgetPlanner } from '@/pages/BudgetPlanner';
 import { FindDecorators } from '@/pages/FindDecorators';
 import { Bookings } from '@/pages/Bookings';
+import { AdminBookings } from '@/pages/AdminBookings';
 import { Settings } from '@/pages/Settings';
 import { ShareView } from '@/pages/ShareView';
 import { Auth } from '@/pages/Auth';
@@ -26,9 +26,9 @@ export default function App() {
               <Route path="templates" element={<ExploreTemplates />}/>
               <Route path="designs" element={<MyDesigns />}/>
               <Route path="moodboards" element={<Moodboards />}/>
-              <Route path="budget" element={<BudgetPlanner />}/>
               <Route path="decorators" element={<FindDecorators />}/>
               <Route path="bookings" element={<Bookings />}/>
+              <Route path="admin/bookings" element={<AdminBookings />}/>
               <Route path="settings" element={<Settings />}/>
             </Route>
           </Routes>

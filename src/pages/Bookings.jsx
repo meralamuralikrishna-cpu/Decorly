@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { Search, Trash2 } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Plus, Search, Trash2 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { useToast } from '@/components/ui/Toast';
 import { Card, CardBody } from '@/components/ui/Card';
@@ -7,22 +7,40 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { ConfirmDialog } from '@/components/ui/Modal';
-import { DemoBadge, Badge } from '@/components/ui/Badge';
-import { formatDate, formatINR, cn } from '@/lib/utils';
-import { Link } from 'react-router-dom';
+import { ConfirmDialog, Modal } from '@/components/ui/Modal';
+import { Badge } from '@/components/ui/Badge';
+import { formatDate, cn } from '@/lib/utils';
+import { Link, useSearchParams } from 'react-router-dom';
 const STATUS_STYLE = {
-    inquiry: 'bg-champagne/25 text-charcoal',
+    pending: 'bg-champagne/25 text-charcoal',
     confirmed: 'bg-sage/40 text-forest',
-    completed: 'bg-forest/15 text-forest',
-    cancelled: 'bg-red-100 text-red-800',
+    declined: 'bg-red-100 text-red-800',
 };
 export function Bookings() {
-    const { bookings, deleteBooking, saveBooking } = useApp();
+    const { bookings, deleteBooking, saveBooking, canSaveData } = useApp();
     const { toast } = useToast();
+    const [searchParams] = useSearchParams();
     const [q, setQ] = useState('');
     const [status, setStatus] = useState('all');
     const [deleteId, setDeleteId] = useState(null);
+    const [addOpen, setAddOpen] = useState(searchParams.get('new') === '1');
+    const [eventDate, setEventDate] = useState('');
+    const [eventType, setEventType] = useState(searchParams.get('eventType') || 'Wedding');
+    const [venue, setVenue] = useState(searchParams.get('venue') || '');
+    const [notes, setNotes] = useState(searchParams.get('notes') || '');
+    useEffect(() => {
+        if (searchParams.get('new') === '1') setAddOpen(true);
+    }, [searchParams]);
+    const addBooking = async (event) => {
+        event.preventDefault();
+        try {
+            await saveBooking({ eventDate, eventType, venue: venue.trim(), notes: notes.trim() });
+            setEventDate(''); setVenue(''); setNotes(''); setAddOpen(false);
+            toast('Booking request submitted for review', 'success');
+        } catch (error) {
+            toast(error instanceof Error ? error.message : 'Could not submit this booking request.', 'error');
+        }
+    };
     const filtered = useMemo(() => {
         return bookings.filter((b) => {
             if (status !== 'all' && b.status !== status)
@@ -39,13 +57,13 @@ export function Bookings() {
       <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
         <div>
           <h1 className="font-display text-4xl md:text-[2.75rem] text-forest tracking-tight leading-none">
-            Bookings
+            Booking history
           </h1>
           <p className="text-sm text-charcoal/60 mt-1">
-            Local demo inquiries only — no real bookings or payments.
+            Your venue booking requests and their review status.
           </p>
         </div>
-        <DemoBadge />
+        <Button onClick={() => setAddOpen(true)}><Plus className="h-4 w-4"/>New request</Button>
       </div>
 
       <div className="flex flex-wrap gap-3 mb-8 items-end">
@@ -55,47 +73,33 @@ export function Bookings() {
         </div>
         <Select label="Status" value={status} onChange={(e) => setStatus(e.target.value)} options={[
             { value: 'all', label: 'All statuses' },
-            { value: 'inquiry', label: 'Inquiry' },
+            { value: 'pending', label: 'Pending review' },
             { value: 'confirmed', label: 'Confirmed' },
-            { value: 'completed', label: 'Completed' },
-            { value: 'cancelled', label: 'Cancelled' },
+            { value: 'declined', label: 'Declined' },
         ]}/>
       </div>
 
-      {filtered.length === 0 ? (<EmptyState title="No bookings" description="Inquire with a decorator from Find Decorators to create a demo booking." action={<Link to="/decorators">
-              <Button>Find decorators</Button>
-            </Link>}/>) : (<ul className="space-y-4">
+      {filtered.length === 0 ? (<EmptyState title="No booking requests" description="Submit a request to send it to the Decorly admin team for review." action={<Button onClick={() => setAddOpen(true)}>New request</Button>}/>) : (<ul className="space-y-4">
           {filtered.map((b) => (<li key={b.id}>
               <Card>
                 <CardBody className="pt-5">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-display text-xl text-forest">{b.decoratorName}</p>
+                        <p className="font-display text-xl text-forest">{b.decoratorName || 'Venue booking'}</p>
                         <Badge className={cn(STATUS_STYLE[b.status])}>{b.status}</Badge>
-                        {b.isDemo && <DemoBadge />}
                       </div>
                       <p className="text-sm text-charcoal/70 mt-1">
                         {b.eventType} · {formatDate(b.eventDate)} · {b.venue}
                       </p>
-                      {(b.designName || b.estimatedBudget != null) && (<p className="text-xs text-forest mt-2">
+                      {b.designName && (<p className="text-xs text-forest mt-2">
                           {b.designId ? (<Link to={`/studio?design=${encodeURIComponent(b.designId)}`} className="underline decoration-champagne/60 hover:decoration-champagne">
                               {b.designName ?? 'Linked design'}
                             </Link>) : (b.designName)}
-                          {b.estimatedBudget != null && (<span className="text-charcoal/50">
-                              {' '}
-                              · estimate {formatINR(b.estimatedBudget)}
-                            </span>)}
                         </p>)}
-                      <p className="text-xs text-charcoal/50 mt-2">{b.notes}</p>
+                      {b.notes && <p className="text-xs text-charcoal/50 mt-2">{b.notes}</p>}
                     </div>
                     <div className="flex gap-2">
-                      {b.status === 'inquiry' && (<Button size="sm" variant="secondary" onClick={() => {
-                        saveBooking({ ...b, status: 'confirmed' });
-                        toast('Marked confirmed (demo)', 'success');
-                    }}>
-                          Mark confirmed
-                        </Button>)}
                       <Button size="sm" variant="secondary" aria-label="Delete booking" onClick={() => setDeleteId(b.id)}>
                         <Trash2 className="h-3.5 w-3.5"/>
                       </Button>
@@ -106,12 +110,24 @@ export function Bookings() {
             </li>))}
         </ul>)}
 
-      <ConfirmDialog open={!!deleteId} title="Delete booking?" message="This booking will be removed from your account." confirmLabel="Delete" danger onCancel={() => setDeleteId(null)} onConfirm={() => {
+      <ConfirmDialog open={!!deleteId} title="Delete booking?" message="This booking request will be removed." confirmLabel="Delete" danger onCancel={() => setDeleteId(null)} onConfirm={async () => {
             if (deleteId) {
-                deleteBooking(deleteId);
-                toast('Booking deleted', 'info');
+                try { await deleteBooking(deleteId); toast('Booking request deleted', 'info'); }
+                catch (error) { toast(error instanceof Error ? error.message : 'Could not delete this request.', 'error'); }
             }
             setDeleteId(null);
         }}/>
+      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="Add a booking" footer={<>
+        <Button variant="secondary" onClick={() => setAddOpen(false)}>Cancel</Button>
+        <Button type="submit" form="booking-form">Submit request</Button>
+      </>}>
+        <form id="booking-form" onSubmit={addBooking} className="space-y-3">
+          {!canSaveData && <p className="text-xs text-amber-800">Sign in with a configured Supabase account to submit requests for admin review.</p>}
+          <Input label="Event date" type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} required />
+          <Input label="Event type" value={eventType} onChange={(e) => setEventType(e.target.value)} required />
+          <Input label="Venue" value={venue} onChange={(e) => setVenue(e.target.value)} />
+          <Input label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
+        </form>
+      </Modal>
     </div>);
 }

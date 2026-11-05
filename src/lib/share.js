@@ -1,7 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import { supabase } from '@/lib/supabase';
 
-const SHARE_FIELDS = 'id, design_id, name, elements, settings, venue_plan, estimated_budget, created_at, status, comments, approved_at, approved_by';
+const SHARE_FIELDS = 'id, design_id, name, elements, settings, venue_plan, created_at, status, comments, approved_at, approved_by';
 
 function mapShare(row) {
   if (!row) return null;
@@ -12,7 +12,6 @@ function mapShare(row) {
     elements: row.elements,
     settings: row.settings,
     venuePlan: row.venue_plan,
-    estimatedBudget: row.estimated_budget,
     createdAt: row.created_at,
     status: row.status,
     comments: row.comments ?? [],
@@ -40,7 +39,6 @@ export async function createSharedDesign(input) {
     elements: input.elements,
     settings: input.settings,
     venue_plan: input.venuePlan,
-    estimated_budget: input.estimatedBudget,
     status: 'pending',
     comments: [],
   }).select(SHARE_FIELDS).single();

@@ -10,9 +10,8 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ConfirmDialog } from '@/components/ui/Modal';
-import { DemoBadge } from '@/components/ui/Badge';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { formatDate, formatINR, cn } from '@/lib/utils';
+import { formatDate, cn } from '@/lib/utils';
 export function MyDesigns() {
     const { designs, deleteDesign, saveDesign, toggleDesignFavorite, setActiveDesignId, canSaveData } = useApp();
     const { toast } = useToast();
@@ -29,7 +28,7 @@ export function MyDesigns() {
         });
     }, [designs, q, favOnly]);
     return (<div className="p-6 md:p-10 animate-fade-in max-w-6xl mx-auto">
-      <PageHeader kicker="Library" title="My Designs" description={canSaveData ? 'Your designs are saved to your Decorly account.' : 'Demo designs are temporary. Sign in to save your work.'} action={<Link to="/studio" onClick={() => setActiveDesignId(null)}>
+      <PageHeader kicker="Library" title="My Designs" description={canSaveData ? 'Your designs are saved to your Decorly account.' : 'Designs are temporary until you connect an account and sign in.'} action={<Link to="/studio" onClick={() => setActiveDesignId(null)}>
             <Button>
               <Plus className="h-4 w-4"/>
               New design
@@ -58,9 +57,6 @@ export function MyDesigns() {
                 <div className="h-32 relative" style={{
                         background: `linear-gradient(145deg, ${th.palette.backdrop}, ${th.palette.primary})`,
                     }}>
-                  {d.notes?.toLowerCase().includes('demo') && (<div className="absolute top-3 left-3">
-                      <DemoBadge />
-                    </div>)}
                   <button type="button" className="absolute top-3 right-3 h-9 w-9 rounded-full bg-white/80 flex items-center justify-center" aria-label="Toggle favorite" onClick={() => toggleDesignFavorite(d.id)}>
                     <Heart className={cn('h-4 w-4 text-forest', d.isFavorite && 'fill-blush text-blush')}/>
                   </button>
@@ -68,7 +64,7 @@ export function MyDesigns() {
                 <CardBody className="pt-4">
                   <p className="font-display text-xl text-forest">{d.name}</p>
                   <p className="text-xs text-charcoal/50 mt-1">
-                    {formatDate(d.updatedAt)} · {formatINR(d.estimatedBudget)}
+                    {formatDate(d.updatedAt)}
                   </p>
                   <div className="flex gap-2 mt-4">
                     <Link to={`/studio?design=${d.id}`} className="flex-1" onClick={() => setActiveDesignId(d.id)}>

@@ -1,216 +1,105 @@
-import { useEffect, useMemo, useState, FormEvent } from 'react';
-import { Heart, Search, Star } from 'lucide-react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { v4 as uuid } from 'uuid';
-import { DEMO_DECORATORS } from '@/data/mock';
-import { useApp } from '@/context/AppContext';
-import { useToast } from '@/components/ui/Toast';
-import { Card, CardBody } from '@/components/ui/Card';
+import { useState } from 'react';
+import { ArrowRight, Check, Clipboard, Flower2, MapPin, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
-import { Modal } from '@/components/ui/Modal';
-import { DemoBadge } from '@/components/ui/Badge';
-import { cn, formatINR } from '@/lib/utils';
+import { useToast } from '@/components/ui/Toast';
+import { useApp } from '@/context/AppContext';
+
+const SERVICES = ['Ceremony flowers', 'Stage & backdrop', 'Table styling', 'Lighting', 'Draping', 'Setup & teardown'];
+
 export function FindDecorators() {
-    const { designs, decoratorFavorites, toggleDecoratorFavorite, saveBooking } = useApp();
-    const { toast } = useToast();
-    const [params] = useSearchParams();
-    const [q, setQ] = useState('');
-    const [city, setCity] = useState('all');
-    const [favOnly, setFavOnly] = useState(false);
-    const [inquire, setInquire] = useState(null);
-    const [eventDate, setEventDate] = useState('');
-    const [eventType, setEventType] = useState('Wedding');
-    const [venue, setVenue] = useState('');
-    const [notes, setNotes] = useState('');
-    const [errors, setErrors] = useState({});
-    const linkedDesignId = params.get('design');
-    const linkedEstimate = Number(params.get('estimate') || 0);
-    const linkedDesign = useMemo(() => (linkedDesignId ? designs.find((d) => d.id === linkedDesignId) ?? null : null), [designs, linkedDesignId]);
-    const estimate = linkedEstimate > 0 ? linkedEstimate : (linkedDesign?.estimatedBudget ?? 0);
-    useEffect(() => {
-        if (!linkedDesign)
-            return;
-        setNotes((prev) => prev.trim()
-            ? prev
-            : `Please quote for design “${linkedDesign.name}” (illustrative studio estimate ${formatINR(estimate)}). Demo inquiry only.`);
-        if (linkedDesign.eventDate)
-            setEventDate(linkedDesign.eventDate);
-    }, [linkedDesign, estimate]);
-    const cities = useMemo(() => ['all', ...Array.from(new Set(DEMO_DECORATORS.map((d) => d.city)))], []);
-    const filtered = useMemo(() => {
-        return DEMO_DECORATORS.filter((d) => {
-            if (favOnly && !decoratorFavorites.includes(d.id))
-                return false;
-            if (city !== 'all' && d.city !== city)
-                return false;
-            if (q) {
-                const hay = `${d.name} ${d.city} ${d.specialties.join(' ')} ${d.bio}`.toLowerCase();
-                if (!hay.includes(q.toLowerCase()))
-                    return false;
-            }
-            return true;
-        });
-    }, [q, city, favOnly, decoratorFavorites]);
-    // Deterministic mock recommendations: sort by rating then name
-    const ranked = useMemo(() => [...filtered].sort((a, b) => b.rating - a.rating || a.name.localeCompare(b.name)), [filtered]);
-    const submitInquiry = (e) => {
-        e.preventDefault();
-        if (!inquire)
-            return;
-        const next = {};
-        if (!eventDate)
-            next.eventDate = 'Event date is required';
-        if (!venue.trim())
-            next.venue = 'Venue is required';
-        setErrors(next);
-        if (Object.keys(next).length)
-            return;
-        saveBooking({
-            id: uuid(),
-            decoratorId: inquire.id,
-            decoratorName: inquire.name,
-            eventDate,
-            eventType,
-            venue: venue.trim(),
-            status: 'inquiry',
-            notes: notes.trim() ||
-                'Demo inquiry — no message sent to a real decorator.',
-            isDemo: true,
-            createdAt: new Date().toISOString(),
-            designId: linkedDesign?.id,
-            designName: linkedDesign?.name,
-            estimatedBudget: estimate > 0 ? estimate : undefined,
-        });
-        toast(linkedDesign
-            ? `Inquiry saved with design “${linkedDesign.name}” (demo)`
-            : 'Demo inquiry only — sign in to save it', 'info');
-        setInquire(null);
-        setEventDate('');
-        setVenue('');
-        setNotes('');
-    };
-    return (<div className="p-6 md:p-10 animate-fade-in max-w-6xl mx-auto">
-      <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
-        <div>
-          <h1 className="font-display text-4xl md:text-[2.75rem] text-forest tracking-tight leading-none">
-            Find Decorators
-          </h1>
-          <p className="text-sm text-charcoal/60 mt-1">
-            Demo directory with deterministic rankings. No real contacts or payments.
-          </p>
-        </div>
-        <DemoBadge />
-      </div>
+  const { toast } = useToast();
+  const { isAdmin } = useApp();
+  const [eventType, setEventType] = useState('Wedding');
+  const [location, setLocation] = useState('');
+  const [budget, setBudget] = useState('');
+  const [style, setStyle] = useState('');
+  const [services, setServices] = useState([]);
 
-      {linkedDesign && (<div className="mb-6 rounded-2xl border border-champagne/40 bg-champagne/10 px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-xs uppercase tracking-wider text-champagne font-medium">
-              Quote request from Studio
-            </p>
-            <p className="font-display text-xl text-forest mt-0.5">{linkedDesign.name}</p>
-            <p className="text-xs text-charcoal/60">
-              Illustrative estimate {formatINR(estimate)} — will attach to your inquiry.
-            </p>
+  const brief = [
+    `Looking for an event decorator for a ${eventType.toLowerCase()}.`,
+    location.trim() && `Location: ${location.trim()}.`,
+    budget.trim() && `Budget: ${budget.trim()}.`,
+    style.trim() && `Style / inspiration: ${style.trim()}.`,
+    services.length > 0 && `Services needed: ${services.join(', ')}.`,
+  ].filter(Boolean).join('\n');
+
+  const copyBrief = async () => {
+    try {
+      await navigator.clipboard.writeText(brief);
+      toast('Search brief copied', 'success');
+    } catch {
+      toast('Could not copy the brief. Check clipboard permissions.', 'error');
+    }
+  };
+
+  const toggleService = (service) => setServices((current) => current.includes(service)
+    ? current.filter((item) => item !== service)
+    : [...current, service]);
+
+  return (
+    <div className="p-6 md:p-10 animate-fade-in max-w-6xl mx-auto">
+      <PageHeader
+        kicker="Local directory"
+        title="Find Decorators"
+        description="Put together a clear brief to share with decorators and keep your search moving."
+      />
+
+      <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-5 items-start">
+        <section className="rounded-2xl border border-sage/30 bg-white/75 p-5 md:p-7 shadow-sm">
+          <div className="flex items-start gap-3 mb-6">
+            <span className="h-10 w-10 rounded-xl bg-champagne/20 text-forest flex items-center justify-center"><Flower2 className="h-5 w-5" /></span>
+            <div>
+              <h2 className="font-display text-2xl text-forest">Your decorator brief</h2>
+              <p className="text-xs text-charcoal/55 mt-1">A few details make it easier to compare replies.</p>
+            </div>
           </div>
-          <Link to={`/studio?design=${encodeURIComponent(linkedDesign.id)}`}>
-            <Button variant="secondary" size="sm">
-              Back to design
-            </Button>
-          </Link>
-        </div>)}
 
-      <div className="flex flex-wrap gap-3 mb-8 items-end">
-        <div className="flex-1 min-w-[200px] relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-charcoal/40"/>
-          <Input className="pl-9" placeholder="Search by name, specialty…" value={q} onChange={(e) => setQ(e.target.value)}/>
-        </div>
-        <Select label="City" options={cities.map((c) => ({
-            value: c,
-            label: c === 'all' ? 'All cities' : c,
-        }))} value={city} onChange={(e) => setCity(e.target.value)}/>
-        <Button variant={favOnly ? 'primary' : 'secondary'} onClick={() => setFavOnly((v) => !v)} aria-pressed={favOnly}>
-          <Heart className={cn('h-4 w-4', favOnly && 'fill-current')}/>
-          Favorites
-        </Button>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <label className="space-y-1.5 text-sm font-medium text-charcoal/80">
+              Event type
+              <select value={eventType} onChange={(e) => setEventType(e.target.value)} className="w-full h-10 px-3 rounded-xl border border-sage/40 bg-white text-sm outline-none focus:border-champagne focus:ring-2 focus:ring-champagne/25">
+                {['Wedding', 'Birthday', 'Baby shower', 'Engagement', 'Anniversary', 'Corporate event', 'Other celebration'].map((type) => <option key={type}>{type}</option>)}
+              </select>
+            </label>
+            <Input label="City or venue" placeholder="e.g. Hyderabad" value={location} onChange={(e) => setLocation(e.target.value)} />
+            <Input label="Approximate budget" placeholder="e.g. ₹1,00,000" value={budget} onChange={(e) => setBudget(e.target.value)} />
+            <Input label="Style or theme" placeholder="e.g. garden, ivory and sage" value={style} onChange={(e) => setStyle(e.target.value)} />
+          </div>
+
+          <fieldset className="mt-6">
+            <legend className="text-sm font-medium text-charcoal/80 mb-2.5">What do you need help with?</legend>
+            <div className="flex flex-wrap gap-2">
+              {SERVICES.map((service) => {
+                const selected = services.includes(service);
+                return <button key={service} type="button" aria-pressed={selected} onClick={() => toggleService(service)} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-xs transition ${selected ? 'border-forest bg-forest text-ivory' : 'border-sage/40 bg-white text-charcoal/70 hover:border-sage'}`}>
+                  {selected && <Check className="h-3 w-3" />}{service}
+                </button>;
+              })}
+            </div>
+          </fieldset>
+        </section>
+
+        <aside className="rounded-2xl border border-champagne/40 bg-ivory p-5 md:p-6">
+          <div className="flex items-center gap-2 text-forest mb-3"><Sparkles className="h-4 w-4" /><h2 className="font-display text-xl">Ready to share</h2></div>
+          <p className="text-xs leading-relaxed text-charcoal/55 mb-4">Copy your brief to share with decorators, then submit a venue booking request and track it in your booking history.</p>
+          <div className="rounded-xl bg-white/75 border border-sage/25 p-4 mb-4 min-h-36">
+            <p className="text-sm text-charcoal whitespace-pre-line leading-relaxed">{brief}</p>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Button onClick={copyBrief} className="w-full"><Clipboard className="h-4 w-4" />Copy brief</Button>
+            <Link to={`/bookings?new=1&venue=${encodeURIComponent(location.trim())}&eventType=${encodeURIComponent(eventType)}&notes=${encodeURIComponent(brief)}`} className="inline-flex items-center justify-center gap-2 h-10 rounded-xl border border-sage/40 bg-white/80 px-4 text-sm font-semibold text-forest hover:bg-white transition">
+              Book a venue <ArrowRight className="h-4 w-4" />
+            </Link>
+            {isAdmin && <Link to="/admin/bookings" className="inline-flex items-center justify-center gap-2 h-10 rounded-xl border border-sage/40 bg-white/80 px-4 text-sm font-semibold text-forest hover:bg-white transition">
+              Admin booking approvals <ArrowRight className="h-4 w-4" />
+            </Link>}
+          </div>
+          <p className="mt-5 pt-4 border-t border-sage/25 flex gap-2 text-[11px] leading-relaxed text-charcoal/50"><MapPin className="h-3.5 w-3.5 shrink-0 mt-0.5" />Decorator profiles are not connected yet, so this brief stays in your browser until you choose to share it.</p>
+        </aside>
       </div>
-
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {ranked.map((d, i) => {
-            const fav = decoratorFavorites.includes(d.id);
-            return (<Card key={d.id} className="flex flex-col">
-              <CardBody className="pt-5 flex-1 flex flex-col">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="font-display text-xl text-forest">{d.name}</p>
-                    <p className="text-xs text-charcoal/50">
-                      {d.city} · {d.priceBand} · {d.yearsExperience} yrs
-                    </p>
-                  </div>
-                  <DemoBadge />
-                </div>
-                <div className="flex items-center gap-1 mt-2 text-champagne text-sm">
-                  <Star className="h-3.5 w-3.5 fill-champagne"/>
-                  {d.rating.toFixed(1)}
-                  {i === 0 && ranked.length > 1 && (<span className="ml-2 text-[10px] text-forest bg-sage/30 px-2 py-0.5 rounded-full">
-                      Top match
-                    </span>)}
-                </div>
-                <p className="text-xs text-charcoal/60 mt-3 flex-1">{d.bio}</p>
-                <div className="flex flex-wrap gap-1 mt-3 mb-4">
-                  {d.specialties.map((s) => (<span key={s} className="text-[10px] px-2 py-0.5 rounded-full bg-blush/40 text-charcoal">
-                      {s}
-                    </span>))}
-                </div>
-                <div className="flex gap-2">
-                  <Button size="sm" className="flex-1" onClick={() => setInquire(d)}>
-                    {linkedDesign ? 'Request quote' : 'Inquire'}
-                  </Button>
-                  <Button size="sm" variant="secondary" aria-label="Toggle favorite" onClick={() => toggleDecoratorFavorite(d.id)}>
-                    <Heart className={cn('h-3.5 w-3.5', fav && 'fill-blush text-blush')}/>
-                  </Button>
-                </div>
-              </CardBody>
-            </Card>);
-        })}
-      </div>
-
-      <Modal open={!!inquire} onClose={() => setInquire(null)} title={linkedDesign
-            ? `Quote — ${inquire?.name ?? ''}`
-            : `Inquire — ${inquire?.name ?? ''}`} footer={<>
-            <Button variant="secondary" onClick={() => setInquire(null)}>
-              Cancel
-            </Button>
-            <Button type="submit" form="inquire-form">
-              Save inquiry
-            </Button>
-          </>}>
-        <p className="text-xs text-charcoal/50 mb-4">
-          Demo form only. Nothing is sent to a real decorator or payment system.
-        </p>
-        {linkedDesign && (<div className="mb-4 rounded-xl bg-sage/15 border border-sage/30 px-3 py-2 text-xs text-charcoal/70">
-            Attaching design <span className="font-medium text-forest">{linkedDesign.name}</span>
-            {estimate > 0 && (<> · studio estimate {formatINR(estimate)}</>)}
-          </div>)}
-        <form id="inquire-form" onSubmit={submitInquiry} className="space-y-3">
-          <Input label="Event date" type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} error={errors.eventDate} required/>
-          <Select label="Event type" value={eventType} onChange={(e) => setEventType(e.target.value)} options={[
-            { value: 'Wedding', label: 'Wedding' },
-            { value: 'Reception', label: 'Reception' },
-            { value: 'Haldi', label: 'Haldi' },
-            { value: 'Mehendi', label: 'Mehendi' },
-            { value: 'Sangeet', label: 'Sangeet' },
-            { value: 'Engagement', label: 'Engagement' },
-            { value: "Valentine's Day", label: "Valentine's Day" },
-            { value: 'Anniversary', label: 'Anniversary' },
-            { value: 'Birthday', label: 'Birthday' },
-            { value: 'Baby Shower', label: 'Baby Shower' },
-            { value: 'Diwali', label: 'Diwali' },
-        ]}/>
-          <Input label="Venue" value={venue} onChange={(e) => setVenue(e.target.value)} error={errors.venue} required/>
-          <Input label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)}/>
-        </form>
-      </Modal>
-    </div>);
+    </div>
+  );
 }

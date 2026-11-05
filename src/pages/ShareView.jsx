@@ -4,8 +4,8 @@ import { addShareComment, getSharedDesign, setShareStatus, } from '@/lib/share';
 import { DesignCanvas } from '@/components/studio/DesignCanvas';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Badge, DemoBadge } from '@/components/ui/Badge';
-import { formatDate, formatINR, cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/Badge';
+import { formatDate, cn } from '@/lib/utils';
 import { Check, MessageCircle, PencilLine } from 'lucide-react';
 import { Wordmark } from '@/components/brand/Wordmark';
 import { BrandMark } from '@/components/brand/BrandMark';
@@ -95,7 +95,6 @@ export function ShareView() {
           <Link to="/">
             <Wordmark size="md"/>
           </Link>
-          <DemoBadge />
         </header>
         <div className="flex-1 flex items-center justify-center p-8">
           <div className="max-w-md text-center space-y-4">
@@ -132,7 +131,6 @@ export function ShareView() {
         </div>
         <div className="flex items-center gap-2">
           <Badge className={cn(STATUS_STYLE[share.status])}>{STATUS_LABEL[share.status]}</Badge>
-          <DemoBadge />
         </div>
       </header>
 
@@ -178,15 +176,6 @@ export function ShareView() {
 
           <aside className="space-y-4">
             <div className="bg-white/70 border border-sage/30 rounded-2xl p-5 space-y-3">
-              <p className="text-[10px] uppercase tracking-wider text-champagne font-medium">
-                Illustrative estimate
-              </p>
-              <p className="font-display text-3xl text-forest">
-                {formatINR(share.estimatedBudget)}
-              </p>
-              <p className="text-[10px] text-charcoal/45 leading-relaxed">
-                Mock figure for discussion only — not a real quote or payment.
-              </p>
               {share.status === 'approved' && share.approvedBy && (<p className="text-xs text-forest bg-sage/25 rounded-lg px-3 py-2">
                   Approved by {share.approvedBy}
                   {share.approvedAt ? ` · ${formatDate(share.approvedAt)}` : ''}

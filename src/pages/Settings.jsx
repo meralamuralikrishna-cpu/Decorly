@@ -29,7 +29,7 @@ export function Settings() {
             city: city.trim() || '—',
             preferredLanguage: locale,
         });
-        toast(canSaveData ? 'Profile saved to your account' : 'Demo change only — sign in to save your profile', canSaveData ? 'success' : 'info');
+        toast(canSaveData ? 'Profile saved to your account' : 'Changes are temporary until you sign in to save your profile', canSaveData ? 'success' : 'info');
     };
     return (<div className="p-6 md:p-10 animate-fade-in max-w-xl mx-auto">
       <h1 className="font-display text-4xl md:text-[2.75rem] text-forest tracking-tight leading-none mb-2">
@@ -63,7 +63,7 @@ export function Settings() {
         </CardHeader>
         <CardBody>
           <p className="text-sm text-charcoal/60 mb-4">
-            {canSaveData ? 'Your saved data is stored in your Supabase account and loads when you sign in.' : 'You are viewing demo data. Sign in to save your profile, designs, bookings, and budget to Supabase.'}
+            {canSaveData ? 'Your saved data is stored in your Supabase account and loads when you sign in.' : 'Connect Supabase and sign in to save your profile, designs, and bookings across sessions.'}
           </p>
         </CardBody>
       </Card>

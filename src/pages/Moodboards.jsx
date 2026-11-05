@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Modal, ConfirmDialog } from '@/components/ui/Modal';
-import { DemoBadge } from '@/components/ui/Badge';
 import { formatDate, cn } from '@/lib/utils';
 const DEFAULT_COLORS = ['#E8C7C4', '#FAF7F2', '#C5A46D', '#A8B5A0'];
 export function Moodboards() {
@@ -53,7 +52,6 @@ export function Moodboards() {
                 .map((t) => t.trim())
                 .filter(Boolean),
             isFavorite: false,
-            isDemo: false,
             createdAt: new Date().toISOString(),
         };
         saveMoodboard(item);
@@ -97,7 +95,6 @@ export function Moodboards() {
               <CardBody className="pt-4">
                 <div className="flex items-start justify-between gap-2">
                   <p className="font-display text-xl text-forest">{m.title}</p>
-                  {m.isDemo && <DemoBadge />}
                 </div>
                 <p className="text-xs text-charcoal/55 mt-1">{m.notes}</p>
                 <p className="text-[10px] text-charcoal/40 mt-2">{formatDate(m.createdAt)}</p>

@@ -1,6 +1,6 @@
 -- Run this in the Supabase SQL Editor.
--- Decorly currently saves one JSON document per account. The payload contains
--- designs, moodboards, bookings, budget, profile, favorites, locale, and notices.
+-- Decorly saves one private JSON workspace per account. Booking requests use
+-- the shared booking_requests table below so admins can review them across users.
 create table if not exists public.user_data (
   user_id uuid primary key references auth.users(id) on delete cascade,
   payload jsonb not null default '{}'::jsonb,
@@ -46,7 +46,66 @@ create policy "Users can update their own data" on public.user_data
 comment on table public.user_data is
   'Private Decorly workspace data, stored as one JSON document per authenticated user.';
 comment on column public.user_data.payload is
-  'JSON object containing the user workspace: designs, moodboards, bookings, budget, profile, favorites, locale, notifications, and active design.';
+  'JSON object containing designs, moodboards, profile, favorites, locale, notifications, and active design.';
+
+-- Booking requests are separate so authorized admins can review requests across accounts.
+create table if not exists public.booking_requests (
+  id uuid primary key default gen_random_uuid(),
+  owner_id uuid not null references auth.users(id) on delete cascade,
+  requester_name text,
+  requester_email text,
+  vendor_name text,
+  event_date date not null,
+  event_type text not null,
+  venue text,
+  notes text,
+  status text not null default 'pending' check (status in ('pending', 'confirmed', 'declined')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.booking_requests add column if not exists requester_name text;
+alter table public.booking_requests add column if not exists requester_email text;
+alter table public.booking_requests alter column vendor_name drop not null;
+
+alter table public.booking_requests enable row level security;
+revoke all on table public.booking_requests from anon, authenticated;
+grant select, insert, delete on table public.booking_requests to authenticated;
+grant update (status, updated_at) on table public.booking_requests to authenticated;
+
+drop policy if exists "Owners and admins can read booking requests" on public.booking_requests;
+drop policy if exists "Users can submit their own booking requests" on public.booking_requests;
+drop policy if exists "Admins can decide booking requests" on public.booking_requests;
+drop policy if exists "Owners can delete their booking requests" on public.booking_requests;
+
+create policy "Owners and admins can read booking requests" on public.booking_requests
+  for select to authenticated
+  using (
+    owner_id = (select auth.uid())
+    or (select auth.jwt()->'app_metadata'->>'role') = 'admin'
+  );
+
+create policy "Users can submit their own booking requests" on public.booking_requests
+  for insert to authenticated
+  with check (
+    owner_id = (select auth.uid())
+    and status = 'pending'
+  );
+
+create policy "Admins can decide booking requests" on public.booking_requests
+  for update to authenticated
+  using ((select auth.jwt()->'app_metadata'->>'role') = 'admin')
+  with check ((select auth.jwt()->'app_metadata'->>'role') = 'admin');
+
+create policy "Owners can delete their booking requests" on public.booking_requests
+  for delete to authenticated
+  using (
+    owner_id = (select auth.uid())
+    or (select auth.jwt()->'app_metadata'->>'role') = 'admin'
+  );
+
+comment on table public.booking_requests is
+  'User booking requests. Admin access is granted only by the trusted app_metadata role claim.';
 
 -- Share links are stored separately because guests can read and comment without
 -- an account. The unguessable UUID share id is the public link credential.
@@ -58,7 +117,6 @@ create table if not exists public.shared_designs (
   elements jsonb not null default '[]'::jsonb,
   settings jsonb not null default '{}'::jsonb,
   venue_plan jsonb not null default '{}'::jsonb,
-  estimated_budget numeric not null default 0,
   status text not null default 'pending' check (status in ('pending', 'approved', 'changes')),
   comments jsonb not null default '[]'::jsonb check (jsonb_typeof(comments) = 'array'),
   created_at timestamptz not null default now(),
@@ -69,9 +127,9 @@ create table if not exists public.shared_designs (
 alter table public.shared_designs enable row level security;
 
 revoke all on table public.shared_designs from anon, authenticated;
-grant select (id, design_id, name, elements, settings, venue_plan, estimated_budget, status, comments, created_at, approved_at, approved_by)
+grant select (id, design_id, name, elements, settings, venue_plan, status, comments, created_at, approved_at, approved_by)
   on table public.shared_designs to anon, authenticated;
-grant insert (id, owner_id, design_id, name, elements, settings, venue_plan, estimated_budget, status, comments)
+grant insert (id, owner_id, design_id, name, elements, settings, venue_plan, status, comments)
   on table public.shared_designs to authenticated;
 grant update (status, comments, approved_at, approved_by)
   on table public.shared_designs to anon, authenticated;

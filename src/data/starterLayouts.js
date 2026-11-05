@@ -1,15 +1,13 @@
 import { DEFAULT_SETTINGS } from './themes';
-export const DEMO_TEMPLATES = [
+export const STARTER_TEMPLATES = [
     {
         id: 'tpl-blush-arch',
         name: 'Blush Arch Ceremony',
         themeId: 'blush-romance',
         style: 'Romantic',
         eventType: 'Wedding',
-        budgetRange: [85000, 140000],
-        description: 'Soft blush arch with peony clusters and champagne lighting. Demo template.',
+        description: 'Soft blush arch with peony clusters and champagne lighting.',
         tags: ['arch', 'blush', 'ceremony'],
-        isDemo: true,
         settings: { ...DEFAULT_SETTINGS, themeId: 'blush-romance', flowerDensity: 75 },
         elements: [
             { libraryId: 'bd-floral-arch', category: 'backdrops', name: 'Floral Arch', x: 220, y: 40, width: 360, height: 320, rotation: 0, color: '#E8C7C4', accent: '#A8B5A0', zIndex: 1 },
@@ -26,10 +24,8 @@ export const DEMO_TEMPLATES = [
         themeId: 'sage-garden',
         style: 'Garden',
         eventType: 'Reception',
-        budgetRange: [70000, 120000],
-        description: 'Lush greenery wall with eucalyptus and soft uplights. Demo template.',
+        description: 'Lush greenery wall with eucalyptus and soft uplights.',
         tags: ['garden', 'sage', 'reception'],
-        isDemo: true,
         settings: { ...DEFAULT_SETTINGS, themeId: 'sage-garden', flowerDensity: 80, lightingIntensity: 45 },
         elements: [
             { libraryId: 'bd-garden-wall', category: 'backdrops', name: 'Garden Wall', x: 180, y: 30, width: 440, height: 300, rotation: 0, color: '#A8B5A0', accent: '#243D35', zIndex: 1 },
@@ -46,10 +42,8 @@ export const DEMO_TEMPLATES = [
         themeId: 'royal-gold',
         style: 'Regal',
         eventType: 'Wedding',
-        budgetRange: [150000, 280000],
-        description: 'Forest and champagne gold mandap with crystal lighting. Demo template.',
+        description: 'Forest and champagne gold mandap with crystal lighting.',
         tags: ['mandap', 'gold', 'traditional'],
-        isDemo: true,
         settings: { ...DEFAULT_SETTINGS, themeId: 'royal-gold', lightingIntensity: 75 },
         elements: [
             { libraryId: 'bd-mandap', category: 'backdrops', name: 'Mandap Frame', x: 180, y: 20, width: 440, height: 340, rotation: 0, color: '#C5A46D', accent: '#E8A838', zIndex: 1 },
@@ -66,10 +60,8 @@ export const DEMO_TEMPLATES = [
         themeId: 'traditional-marigold',
         style: 'Festive',
         eventType: 'Haldi',
-        budgetRange: [45000, 90000],
-        description: 'Warm marigold garlands with ivory drapes. Demo template.',
+        description: 'Warm marigold garlands with ivory drapes.',
         tags: ['marigold', 'haldi', 'festive'],
-        isDemo: true,
         settings: { ...DEFAULT_SETTINGS, themeId: 'traditional-marigold', flowerDensity: 90 },
         elements: [
             { libraryId: 'bd-draped-curtain', category: 'backdrops', name: 'Draped Curtain', x: 200, y: 30, width: 400, height: 300, rotation: 0, color: '#FAF7F2', accent: '#C5A46D', zIndex: 1 },
@@ -86,10 +78,8 @@ export const DEMO_TEMPLATES = [
         themeId: 'ivory-elegance',
         style: 'Minimal',
         eventType: 'Reception',
-        budgetRange: [60000, 110000],
-        description: 'Clean ivory drapes with sparse peonies and soft wash. Demo template.',
+        description: 'Clean ivory drapes with sparse peonies and soft wash.',
         tags: ['ivory', 'minimal', 'dinner'],
-        isDemo: true,
         settings: { ...DEFAULT_SETTINGS, themeId: 'ivory-elegance', flowerDensity: 40, arrangementStyle: 'minimal' },
         elements: [
             { libraryId: 'bd-draped-curtain', category: 'backdrops', name: 'Draped Curtain', x: 210, y: 40, width: 380, height: 280, rotation: 0, color: '#FAF7F2', accent: '#C5A46D', zIndex: 1 },
@@ -106,10 +96,8 @@ export const DEMO_TEMPLATES = [
         themeId: 'blush-romance',
         style: 'Romantic',
         eventType: "Valentine's Day",
-        budgetRange: [35000, 75000],
-        description: 'Red roses, moon-gate arch, fairy lights, and a sweetheart seat for February 14. Demo template.',
+        description: 'Red roses, moon-gate arch, fairy lights, and a sweetheart seat for February 14.',
         tags: ['valentine', 'roses', 'romantic', 'date night', 'heart'],
-        isDemo: true,
         settings: {
             ...DEFAULT_SETTINGS,
             themeId: 'blush-romance',
@@ -137,10 +125,8 @@ export const DEMO_TEMPLATES = [
         themeId: 'blush-romance',
         style: 'Intimate',
         eventType: "Valentine's Day",
-        budgetRange: [18000, 42000],
-        description: 'Intimate table for two — roses, candles, and a soft silk drape. Demo template.',
+        description: 'Intimate table for two — roses, candles, and a soft silk drape.',
         tags: ['valentine', 'dinner', 'intimate', 'candles'],
-        isDemo: true,
         settings: {
             ...DEFAULT_SETTINGS,
             themeId: 'blush-romance',
@@ -165,10 +151,8 @@ export const DEMO_TEMPLATES = [
         themeId: 'royal-gold',
         style: 'Regal',
         eventType: 'Engagement',
-        budgetRange: [55000, 110000],
-        description: 'Gold neon, floral hoop, and champagne lighting for a proposal / engagement. Demo template.',
+        description: 'Gold neon, floral hoop, and champagne lighting for a proposal / engagement.',
         tags: ['engagement', 'proposal', 'neon', 'gold'],
-        isDemo: true,
         settings: {
             ...DEFAULT_SETTINGS,
             themeId: 'royal-gold',
@@ -195,10 +179,8 @@ export const DEMO_TEMPLATES = [
         themeId: 'ivory-elegance',
         style: 'Elegant',
         eventType: 'Anniversary',
-        budgetRange: [40000, 85000],
-        description: 'Ivory peonies, crystal chandelier, and soft drapes for milestone anniversaries. Demo template.',
+        description: 'Ivory peonies, crystal chandelier, and soft drapes for milestone anniversaries.',
         tags: ['anniversary', 'ivory', 'elegant', 'milestone'],
-        isDemo: true,
         settings: {
             ...DEFAULT_SETTINGS,
             themeId: 'ivory-elegance',
@@ -224,10 +206,8 @@ export const DEMO_TEMPLATES = [
         themeId: 'blush-romance',
         style: 'Festive',
         eventType: 'Birthday',
-        budgetRange: [25000, 60000],
-        description: 'Balloon arch, neon sign, cake table, and confetti for birthdays. Demo template.',
+        description: 'Balloon arch, neon sign, cake table, and confetti for birthdays.',
         tags: ['birthday', 'balloons', 'party', 'cake'],
-        isDemo: true,
         settings: {
             ...DEFAULT_SETTINGS,
             themeId: 'blush-romance',
@@ -253,10 +233,8 @@ export const DEMO_TEMPLATES = [
         themeId: 'sage-garden',
         style: 'Soft',
         eventType: 'Baby Shower',
-        budgetRange: [22000, 50000],
-        description: 'Pastel balloons, pampas, and a gentle garden wall for baby showers. Demo template.',
+        description: 'Pastel balloons, pampas, and a gentle garden wall for baby showers.',
         tags: ['baby shower', 'pastel', 'pampas', 'soft'],
-        isDemo: true,
         settings: {
             ...DEFAULT_SETTINGS,
             themeId: 'sage-garden',
@@ -283,10 +261,8 @@ export const DEMO_TEMPLATES = [
         themeId: 'traditional-marigold',
         style: 'Festive',
         eventType: 'Mehendi',
-        budgetRange: [40000, 85000],
-        description: 'Marigold toran, diyas, urli, and rangoli for a sunny mehendi. Demo template.',
+        description: 'Marigold toran, diyas, urli, and rangoli for a sunny mehendi.',
         tags: ['mehendi', 'marigold', 'diya', 'traditional'],
-        isDemo: true,
         settings: {
             ...DEFAULT_SETTINGS,
             themeId: 'traditional-marigold',
@@ -313,10 +289,8 @@ export const DEMO_TEMPLATES = [
         themeId: 'royal-gold',
         style: 'Party',
         eventType: 'Sangeet',
-        budgetRange: [80000, 160000],
-        description: 'LED wash, fairy canopy, and throne seats for a high-energy sangeet. Demo template.',
+        description: 'LED wash, fairy canopy, and throne seats for a high-energy sangeet.',
         tags: ['sangeet', 'lights', 'dance', 'party'],
-        isDemo: true,
         settings: {
             ...DEFAULT_SETTINGS,
             themeId: 'royal-gold',
@@ -343,10 +317,8 @@ export const DEMO_TEMPLATES = [
         themeId: 'traditional-marigold',
         style: 'Festive',
         eventType: 'Diwali',
-        budgetRange: [30000, 70000],
-        description: 'Diyas, marigold, lanterns, and a kalash entrance for Diwali parties. Demo template.',
+        description: 'Diyas, marigold, lanterns, and a kalash entrance for Diwali parties.',
         tags: ['diwali', 'lights', 'diya', 'festive'],
-        isDemo: true,
         settings: {
             ...DEFAULT_SETTINGS,
             themeId: 'traditional-marigold',
@@ -369,140 +341,10 @@ export const DEMO_TEMPLATES = [
         ],
     },
 ];
-export const DEMO_DECORATORS = [
-    {
-        id: 'dec-1',
-        name: 'Ananya Floral Atelier',
-        city: 'Hyderabad',
-        specialties: ['Wedding', 'Floral arches', 'Mandap'],
-        rating: 4.8,
-        priceBand: '₹₹₹',
-        yearsExperience: 12,
-        bio: 'Demo profile. Specialises in blush and ivory ceremony installations.',
-        isDemo: true,
-    },
-    {
-        id: 'dec-2',
-        name: 'Green Room Events',
-        city: 'Bengaluru',
-        specialties: ['Garden', 'Reception', 'Lighting'],
-        rating: 4.6,
-        priceBand: '₹₹',
-        yearsExperience: 8,
-        bio: 'Demo profile. Known for sage garden walls and soft uplighting.',
-        isDemo: true,
-    },
-    {
-        id: 'dec-3',
-        name: 'Marigold & Moon',
-        city: 'Chennai',
-        specialties: ['Haldi', 'Traditional', 'Festive'],
-        rating: 4.7,
-        priceBand: '₹₹',
-        yearsExperience: 10,
-        bio: 'Demo profile. Traditional marigold courtyards and courtyard mandaps.',
-        isDemo: true,
-    },
-    {
-        id: 'dec-4',
-        name: 'Lumen & Lace',
-        city: 'Mumbai',
-        specialties: ['Reception', 'Lighting', 'Minimal'],
-        rating: 4.9,
-        priceBand: '₹₹₹',
-        yearsExperience: 15,
-        bio: 'Demo profile. Crystal lighting and ivory minimal dinner looks.',
-        isDemo: true,
-    },
-    {
-        id: 'dec-5',
-        name: 'Petal House Co.',
-        city: 'Hyderabad',
-        specialties: ['Engagement', 'Props', 'Fabrics'],
-        rating: 4.5,
-        priceBand: '₹',
-        yearsExperience: 5,
-        bio: 'Demo profile. Boutique props and silk drapes for intimate events.',
-        isDemo: true,
-    },
-];
-export const DEMO_MOODBOARDS = [
-    {
-        id: 'mb-1',
-        title: 'Soft Blush Evening',
-        colors: ['#E8C7C4', '#FAF7F2', '#C5A46D', '#A8B5A0'],
-        notes: 'Demo moodboard — blush florals against ivory linen.',
-        tags: ['blush', 'evening'],
-        isFavorite: true,
-        isDemo: true,
-        createdAt: '2026-09-12T10:00:00.000Z',
-    },
-    {
-        id: 'mb-2',
-        title: 'Forest Mandap Study',
-        colors: ['#243D35', '#C5A46D', '#FAF7F2', '#E8A838'],
-        notes: 'Demo moodboard — deep forest with champagne gold accents.',
-        tags: ['mandap', 'gold'],
-        isFavorite: false,
-        isDemo: true,
-        createdAt: '2026-09-20T10:00:00.000Z',
-    },
-];
-export const DEMO_BOOKINGS = [
-    {
-        id: 'bk-1',
-        decoratorId: 'dec-1',
-        decoratorName: 'Ananya Floral Atelier',
-        eventDate: '2026-12-14',
-        eventType: 'Wedding ceremony',
-        venue: 'Jubilee Hills Club (demo)',
-        status: 'inquiry',
-        notes: 'Demo booking — blush arch inquiry. No payment processed.',
-        isDemo: true,
-        createdAt: '2026-10-01T09:00:00.000Z',
-    },
-];
-export const DEMO_BUDGET = {
-    id: 'budget-default',
-    eventName: 'December Celebration (demo)',
-    totalBudget: 250000,
-    updatedAt: '2026-10-20T12:00:00.000Z',
-    categories: [
-        { id: 'cat-flowers', name: 'Flowers & greenery', planned: 80000, spent: 12000 },
-        { id: 'cat-backdrop', name: 'Backdrop & structure', planned: 60000, spent: 0 },
-        { id: 'cat-lighting', name: 'Lighting', planned: 40000, spent: 5000 },
-        { id: 'cat-furniture', name: 'Furniture & stage', planned: 35000, spent: 0 },
-        { id: 'cat-fabrics', name: 'Fabrics & drapes', planned: 20000, spent: 3000 },
-        { id: 'cat-misc', name: 'Props & misc', planned: 15000, spent: 2000 },
-    ],
-};
-export const DEMO_NOTIFICATIONS = [
-    {
-        id: 'n1',
-        title: 'Welcome to Decorly',
-        body: 'Your designs stay private to your account. No payments are processed.',
-        read: false,
-        createdAt: '2026-10-27T08:00:00.000Z',
-    },
-    {
-        id: 'n2',
-        title: 'New demo template',
-        body: 'Marigold Courtyard is ready in Explore Templates.',
-        read: false,
-        createdAt: '2026-10-26T14:00:00.000Z',
-    },
-    {
-        id: 'n3',
-        title: 'Budget reminder',
-        body: 'Your demo budget plan is at 9% spent — illustrative only.',
-        read: true,
-        createdAt: '2026-10-25T10:00:00.000Z',
-    },
-];
 export const DEFAULT_PROFILE = {
-    name: 'Guest Designer',
-    email: 'guest@decorly.local',
-    city: 'Hyderabad',
+    name: '',
+    email: '',
+    city: '',
     preferredLanguage: 'en',
 };
 export const POPULAR_COMBOS = [
@@ -535,60 +377,3 @@ export const POPULAR_COMBOS = [
         themeId: 'sage-garden',
     },
 ];
-function seedFromTemplate(tplIndex, meta) {
-    const tpl = DEMO_TEMPLATES[tplIndex];
-    return {
-        ...meta,
-        thumbnailTheme: tpl.themeId,
-        settings: { ...tpl.settings },
-        elements: tpl.elements.map((el, i) => ({
-            ...el,
-            id: `${meta.id}-el-${i}`,
-        })),
-    };
-}
-/** Default decoration designs shown in Recent / My Designs */
-export const SEED_DESIGNS = [
-    seedFromTemplate(0, {
-        id: 'design-seed-1',
-        name: 'Blush Floral Arch',
-        createdAt: '2026-10-15T10:00:00.000Z',
-        updatedAt: '2026-10-26T18:00:00.000Z',
-        isFavorite: true,
-        eventDate: '2026-12-14',
-        notes: 'Ceremony arch with blush roses — demo design.',
-        estimatedBudget: 95000,
-    }),
-    seedFromTemplate(1, {
-        id: 'design-seed-2',
-        name: 'Sage Garden Reception',
-        createdAt: '2026-10-12T09:00:00.000Z',
-        updatedAt: '2026-10-25T14:30:00.000Z',
-        isFavorite: false,
-        eventDate: '2026-11-28',
-        notes: 'Greenery wall and soft uplights — demo design.',
-        estimatedBudget: 88000,
-    }),
-    seedFromTemplate(3, {
-        id: 'design-seed-3',
-        name: 'Marigold Courtyard',
-        createdAt: '2026-10-10T11:00:00.000Z',
-        updatedAt: '2026-10-24T11:00:00.000Z',
-        isFavorite: true,
-        eventDate: '2026-11-08',
-        notes: 'Festive Haldi courtyard look — demo design.',
-        estimatedBudget: 62000,
-    }),
-    seedFromTemplate(2, {
-        id: 'design-seed-4',
-        name: 'Royal Gold Mandap',
-        createdAt: '2026-10-08T08:00:00.000Z',
-        updatedAt: '2026-10-22T20:15:00.000Z',
-        isFavorite: false,
-        eventDate: '2027-01-18',
-        notes: 'Forest and champagne mandap — demo design.',
-        estimatedBudget: 185000,
-    }),
-];
-/** @deprecated use SEED_DESIGNS */
-export const SEED_DESIGN = SEED_DESIGNS[0];

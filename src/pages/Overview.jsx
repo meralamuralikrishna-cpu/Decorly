@@ -1,17 +1,16 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Plus, LayoutTemplate, Calendar, Wallet } from 'lucide-react';
+import { ArrowRight, Plus, LayoutTemplate, Calendar } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { t } from '@/lib/i18n';
 import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
-import { DemoBadge } from '@/components/ui/Badge';
 import { BrandMark } from '@/components/brand/BrandMark';
 import { Wordmark } from '@/components/brand/Wordmark';
-import { POPULAR_COMBOS } from '@/data/mock';
+import { POPULAR_COMBOS } from '@/data/starterLayouts';
 import { getTheme } from '@/data/themes';
-import { formatDate, formatINR } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
 export function Overview() {
-    const { locale, designs, budget, setActiveDesignId } = useApp();
+    const { locale, designs, setActiveDesignId } = useApp();
     const recent = [...designs]
         .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
         .slice(0, 4);
@@ -19,8 +18,6 @@ export function Overview() {
         .filter((d) => d.eventDate)
         .sort((a, b) => (a.eventDate ?? '').localeCompare(b.eventDate ?? ''))
         .slice(0, 3);
-    const spent = budget.categories.reduce((s, c) => s + c.spent, 0);
-    const pct = Math.min(100, Math.round((spent / budget.totalBudget) * 100));
     return (<div className="animate-fade-in">
       <section className="lookbook-hero min-h-[520px] grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-center px-6 md:px-10 py-10 md:py-12">
         <div className="relative z-10 animate-brand-in">
@@ -88,7 +85,7 @@ export function Overview() {
                         {d.name}
                       </p>
                       <p className="text-xs text-charcoal/50 mt-0.5">
-                        Updated {formatDate(d.updatedAt)} · {formatINR(d.estimatedBudget)}
+                        Updated {formatDate(d.updatedAt)}
                       </p>
                     </CardBody>
                   </Card>
@@ -128,34 +125,6 @@ export function Overview() {
             </Card>
           </section>
 
-          <section>
-            <p className="section-kicker mb-2 flex items-center gap-2">
-              <Wallet className="h-3.5 w-3.5"/>
-              Spend
-            </p>
-            <h2 className="font-display text-2xl text-forest tracking-tight mb-4">
-              {t(locale, 'budgetProgress')}
-            </h2>
-            <Card>
-              <CardBody className="pt-5">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm text-charcoal/70">{budget.eventName}</p>
-                  <DemoBadge />
-                </div>
-                <p className="font-display text-3xl text-forest mb-3 tracking-tight">
-                  {formatINR(spent)}{' '}
-                  <span className="text-base text-charcoal/35">/ {formatINR(budget.totalBudget)}</span>
-                </p>
-                <div className="h-2 rounded-full bg-sage/20 overflow-hidden">
-                  <div className="h-full rounded-full bg-gradient-to-r from-forest via-sage to-champagne transition-all duration-700" style={{ width: `${pct}%` }}/>
-                </div>
-                <p className="text-[10px] text-charcoal/45 mt-2">{pct}% of demo budget</p>
-                <Link to="/budget" className="inline-block mt-3 text-xs font-semibold text-champagne hover:text-forest transition">
-                  Open budget planner →
-                </Link>
-              </CardBody>
-            </Card>
-          </section>
         </div>
       </div>
 
@@ -167,7 +136,7 @@ export function Overview() {
           </h2>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {POPULAR_COMBOS.map((c, i) => (<Link key={c.id} to={`/studio?theme=${c.themeId}`} onClick={() => setActiveDesignId(null)} title={t(locale, 'demoPalette')} className="animate-slide-up block" style={{ animationDelay: `${i * 55}ms` }}>
+          {POPULAR_COMBOS.map((c, i) => (<Link key={c.id} to={`/studio?theme=${c.themeId}`} onClick={() => setActiveDesignId(null)} className="animate-slide-up block" style={{ animationDelay: `${i * 55}ms` }}>
               <Card className="overflow-hidden h-full transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_8px_24px_rgba(16,36,30,0.1)]">
                 <div className="h-20 flex">
                   {c.colors.map((col) => (<div key={col} className="flex-1" style={{ background: col }}/>))}
