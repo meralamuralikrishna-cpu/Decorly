@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Check, X } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { useToast } from '@/components/ui/Toast';
@@ -11,7 +11,18 @@ import { formatDate, cn } from '@/lib/utils';
 export function AdminBookings() {
   const { isAdmin, bookings, setBookingStatus } = useApp();
   const { toast } = useToast();
-  if (!isAdmin) return <Navigate to="/" replace />;
+  if (!isAdmin) {
+    return (
+      <div className="p-6 md:p-10 max-w-3xl mx-auto">
+        <p className="section-kicker mb-2">Administration</p>
+        <h1 className="font-display text-4xl text-forest tracking-tight">Admin access required</h1>
+        <p className="text-sm text-charcoal/65 mt-3">
+          This account does not have the trusted admin role. Set <code>app_metadata.role</code> to <code>admin</code> for this account in Supabase, then sign out and sign back in.
+        </p>
+        <Link to="/" className="inline-flex mt-5 text-sm font-semibold text-forest underline decoration-champagne/70 hover:decoration-champagne">Return to workspace</Link>
+      </div>
+    );
+  }
 
   const decide = async (booking, status) => {
     try {
