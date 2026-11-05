@@ -24,6 +24,7 @@ export function Bookings() {
     const [status, setStatus] = useState('all');
     const [deleteId, setDeleteId] = useState(null);
     const [addOpen, setAddOpen] = useState(searchParams.get('new') === '1');
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [eventDate, setEventDate] = useState('');
     const [eventType, setEventType] = useState(searchParams.get('eventType') || 'Wedding');
     const [venue, setVenue] = useState(searchParams.get('venue') || '');
@@ -36,12 +37,16 @@ export function Bookings() {
     }, [searchParams]);
     const addBooking = async (event) => {
         event.preventDefault();
+        if (isSubmitting) return;
+        setIsSubmitting(true);
         try {
             await saveBooking({ eventDate, eventType, venue: venue.trim(), notes: notes.trim(), designId: linkedDesignId, designName: linkedDesignName, designType: linkedDesignType });
             setEventDate(''); setVenue(''); setNotes(''); setAddOpen(false);
             toast('Booking request submitted for review', 'success');
         } catch (error) {
-            toast(error instanceof Error ? error.message : 'Could not submit this booking request.', 'error');
+            toast(error?.message || 'Could not submit this booking request. Check the Supabase booking_requests table and RLS policies.', 'error');
+        } finally {
+            setIsSubmitting(false);
         }
     };
     const filtered = useMemo(() => {
@@ -122,7 +127,7 @@ export function Bookings() {
         }}/>
       <Modal open={addOpen} onClose={() => setAddOpen(false)} title="Add a booking" footer={<>
         <Button variant="secondary" onClick={() => setAddOpen(false)}>Cancel</Button>
-        <Button type="submit" form="booking-form">Submit request</Button>
+        <Button type="submit" form="booking-form" disabled={isSubmitting}>{isSubmitting ? 'Submitting…' : 'Submit request'}</Button>
       </>}>
         <form id="booking-form" onSubmit={addBooking} className="space-y-3">
           {!canSaveData && <p className="text-xs text-amber-800">Sign in with a configured Supabase account to submit requests for admin review.</p>}
