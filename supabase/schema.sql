@@ -55,6 +55,9 @@ create table if not exists public.booking_requests (
   requester_name text,
   requester_email text,
   vendor_name text,
+  design_id text,
+  design_name text,
+  design_type text,
   event_date date not null,
   event_type text not null,
   venue text,
@@ -67,6 +70,9 @@ create table if not exists public.booking_requests (
 alter table public.booking_requests add column if not exists requester_name text;
 alter table public.booking_requests add column if not exists requester_email text;
 alter table public.booking_requests alter column vendor_name drop not null;
+alter table public.booking_requests add column if not exists design_id text;
+alter table public.booking_requests add column if not exists design_name text;
+alter table public.booking_requests add column if not exists design_type text;
 
 alter table public.booking_requests enable row level security;
 revoke all on table public.booking_requests from anon, authenticated;

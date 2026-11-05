@@ -28,13 +28,16 @@ export function Bookings() {
     const [eventType, setEventType] = useState(searchParams.get('eventType') || 'Wedding');
     const [venue, setVenue] = useState(searchParams.get('venue') || '');
     const [notes, setNotes] = useState(searchParams.get('notes') || '');
+    const linkedDesignId = searchParams.get('designId') || '';
+    const linkedDesignName = searchParams.get('designName') || '';
+    const linkedDesignType = searchParams.get('designType') || '';
     useEffect(() => {
         if (searchParams.get('new') === '1') setAddOpen(true);
     }, [searchParams]);
     const addBooking = async (event) => {
         event.preventDefault();
         try {
-            await saveBooking({ eventDate, eventType, venue: venue.trim(), notes: notes.trim() });
+            await saveBooking({ eventDate, eventType, venue: venue.trim(), notes: notes.trim(), designId: linkedDesignId, designName: linkedDesignName, designType: linkedDesignType });
             setEventDate(''); setVenue(''); setNotes(''); setAddOpen(false);
             toast('Booking request submitted for review', 'success');
         } catch (error) {
@@ -93,7 +96,7 @@ export function Bookings() {
                         {b.eventType} · {formatDate(b.eventDate)} · {b.venue}
                       </p>
                       {b.designName && (<p className="text-xs text-forest mt-2">
-                          {b.designId ? (<Link to={`/studio?design=${encodeURIComponent(b.designId)}`} className="underline decoration-champagne/60 hover:decoration-champagne">
+                          {b.designId ? (<Link to={b.designType === 'template' ? `/studio?template=${encodeURIComponent(b.designId)}` : `/studio?design=${encodeURIComponent(b.designId)}`} className="underline decoration-champagne/60 hover:decoration-champagne">
                               {b.designName ?? 'Linked design'}
                             </Link>) : (b.designName)}
                         </p>)}
@@ -123,6 +126,7 @@ export function Bookings() {
       </>}>
         <form id="booking-form" onSubmit={addBooking} className="space-y-3">
           {!canSaveData && <p className="text-xs text-amber-800">Sign in with a configured Supabase account to submit requests for admin review.</p>}
+          {linkedDesignName && <p className="rounded-lg bg-sage/15 px-3 py-2 text-sm text-forest">Linked decoration: <span className="font-semibold">{linkedDesignName}</span></p>}
           <Input label="Event date" type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} required />
           <Input label="Event type" value={eventType} onChange={(e) => setEventType(e.target.value)} required />
           <Input label="Venue" value={venue} onChange={(e) => setVenue(e.target.value)} />

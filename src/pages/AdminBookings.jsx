@@ -56,6 +56,7 @@ export function AdminBookings() {
                       <Badge className={cn('bg-champagne/25 text-charcoal')}>Pending review</Badge>
                     </div>
                     <p className="text-sm text-charcoal/70">{booking.eventType} · {formatDate(booking.eventDate)}{booking.venue ? ` · ${booking.venue}` : ''}</p>
+                    {booking.designName && <p className="text-sm text-forest">Decoration: {booking.designName}</p>}
                     {booking.notes && <p className="text-sm text-charcoal/60">{booking.notes}</p>}
                     {(booking.requesterName || booking.requesterEmail) && <p className="text-sm text-forest">Requested by {booking.requesterName || booking.requesterEmail}{booking.requesterName && booking.requesterEmail ? ` · ${booking.requesterEmail}` : ''}</p>}
                     <p className="text-[11px] text-charcoal/40">Request {booking.id} · Submitted {formatDate(booking.createdAt)}</p>

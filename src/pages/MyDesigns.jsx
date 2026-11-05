@@ -66,11 +66,14 @@ export function MyDesigns() {
                   <p className="text-xs text-charcoal/50 mt-1">
                     {formatDate(d.updatedAt)}
                   </p>
-                  <div className="flex gap-2 mt-4">
+                  <div className="flex flex-wrap gap-2 mt-4">
                     <Link to={`/studio?design=${d.id}`} className="flex-1" onClick={() => setActiveDesignId(d.id)}>
                       <Button size="sm" className="w-full">
                         Open
                       </Button>
+                    </Link>
+                    <Link to={`/decorators?designType=custom&designId=${encodeURIComponent(d.id)}&designName=${encodeURIComponent(d.name)}`} className="flex-1">
+                      <Button size="sm" variant="secondary" className="w-full">Find Decorators</Button>
                     </Link>
                     <Button size="sm" variant="secondary" aria-label={`Duplicate ${d.name}`} title="Duplicate design" onClick={() => {
                       const copy = { ...d, id: uuid(), name: `${d.name} copy`, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), elements: d.elements.map((element) => ({ ...element, id: uuid() })) };

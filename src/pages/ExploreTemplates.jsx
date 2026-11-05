@@ -91,11 +91,14 @@ export function ExploreTemplates() {
                         {tag}
                       </span>))}
                   </div>
-                  <Link to={`/studio?template=${tpl.id}`} onClick={() => setActiveDesignId(null)}>
-                    <Button className="w-full" size="sm">
-                      Use in Studio
-                    </Button>
-                  </Link>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Link to={`/studio?template=${tpl.id}`} onClick={() => setActiveDesignId(null)}>
+                      <Button className="w-full" size="sm">Use in Studio</Button>
+                    </Link>
+                    <Link to={`/decorators?designType=template&designId=${encodeURIComponent(tpl.id)}&designName=${encodeURIComponent(tpl.name)}&eventType=${encodeURIComponent(tpl.eventType)}&style=${encodeURIComponent(tpl.style)}`}>
+                      <Button className="w-full" size="sm" variant="secondary">Find Decorators</Button>
+                    </Link>
+                  </div>
                 </CardBody>
               </Card>);
             })}

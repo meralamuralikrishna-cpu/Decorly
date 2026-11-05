@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ArrowRight, Check, Clipboard, Flower2, MapPin, Sparkles } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -10,14 +10,21 @@ const SERVICES = ['Ceremony flowers', 'Stage & backdrop', 'Table styling', 'Ligh
 
 export function FindDecorators() {
   const { toast } = useToast();
-  const [eventType, setEventType] = useState('Wedding');
+  const [searchParams] = useSearchParams();
+  const linkedDesign = {
+    id: searchParams.get('designId') || '',
+    name: searchParams.get('designName') || '',
+    type: searchParams.get('designType') || '',
+  };
+  const [eventType, setEventType] = useState(searchParams.get('eventType') || 'Wedding');
   const [location, setLocation] = useState('');
   const [budget, setBudget] = useState('');
-  const [style, setStyle] = useState('');
+  const [style, setStyle] = useState(searchParams.get('style') || '');
   const [services, setServices] = useState([]);
 
   const brief = [
     `Looking for an event decorator for a ${eventType.toLowerCase()}.`,
+    linkedDesign.name && `Decoration design: ${linkedDesign.name}.`,
     location.trim() && `Location: ${location.trim()}.`,
     budget.trim() && `Budget: ${budget.trim()}.`,
     style.trim() && `Style / inspiration: ${style.trim()}.`,
@@ -55,6 +62,11 @@ export function FindDecorators() {
             </div>
           </div>
 
+          {linkedDesign.name && <div className="mb-5 rounded-xl border border-champagne/35 bg-champagne/10 px-4 py-3">
+            <p className="text-[10px] uppercase tracking-wider font-semibold text-charcoal/50">Selected decoration</p>
+            <p className="text-sm font-semibold text-forest mt-1">{linkedDesign.name}</p>
+          </div>}
+
           <div className="grid sm:grid-cols-2 gap-4">
             <label className="space-y-1.5 text-sm font-medium text-charcoal/80">
               Event type
@@ -88,7 +100,7 @@ export function FindDecorators() {
           </div>
           <div className="flex flex-col gap-2">
             <Button onClick={copyBrief} className="w-full"><Clipboard className="h-4 w-4" />Copy brief</Button>
-            <Link to={`/bookings?new=1&venue=${encodeURIComponent(location.trim())}&eventType=${encodeURIComponent(eventType)}&notes=${encodeURIComponent(brief)}`} className="inline-flex items-center justify-center gap-2 h-10 rounded-xl border border-sage/40 bg-white/80 px-4 text-sm font-semibold text-forest hover:bg-white transition">
+            <Link to={`/bookings?new=1&venue=${encodeURIComponent(location.trim())}&eventType=${encodeURIComponent(eventType)}&notes=${encodeURIComponent(brief)}&designId=${encodeURIComponent(linkedDesign.id)}&designName=${encodeURIComponent(linkedDesign.name)}&designType=${encodeURIComponent(linkedDesign.type)}`} className="inline-flex items-center justify-center gap-2 h-10 rounded-xl border border-sage/40 bg-white/80 px-4 text-sm font-semibold text-forest hover:bg-white transition">
               Book a venue <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
