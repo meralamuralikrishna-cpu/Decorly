@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
-import { Bell, Menu, User, LogIn } from 'lucide-react';
+import { Bell, Menu, User, LogIn, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useApp } from '@/context/AppContext';
 import { t } from '@/lib/i18n';
 import { Button } from '@/components/ui/Button';
 import { cn, formatDate } from '@/lib/utils';
 export function Header() {
-    const { locale, setMobileNavOpen, notifications, markNotificationRead, markAllNotificationsRead, profile, authEnabled, user } = useApp();
+    const { locale, setMobileNavOpen, notifications, markNotificationRead, markAllNotificationsRead, profile, authEnabled, user, signOut } = useApp();
     const [notifOpen, setNotifOpen] = useState(false);
     const [profileOpen, setProfileOpen] = useState(false);
     const notifRef = useRef(null);
@@ -71,6 +71,9 @@ export function Header() {
               </p>
             </div>)}
         </div>
+        {authEnabled && user && <Button variant="ghost" size="sm" className="px-2 sm:px-3" onClick={() => void signOut()} aria-label="Sign out" title="Sign out">
+          <LogOut className="h-4 w-4"/><span className="hidden sm:inline">Sign out</span>
+        </Button>}
       </div>
     </header>);
 }
