@@ -28,8 +28,8 @@ export default function App() {
               <Route path="moodboards" element={<Moodboards />}/>
               <Route path="decorators" element={<FindDecorators />}/>
               <Route path="bookings" element={<Bookings />}/>
-              <Route path="admin" element={<Navigate to="/admin/bookings" replace />}/>
-              <Route path="admin/bookings" element={<AdminBookings />}/>
+              <Route path="admin" element={<AdminBookings />}/>
+              <Route path="admin/bookings" element={<Navigate to="/admin" replace />}/>
               <Route path="settings" element={<Settings />}/>
             </Route>
           </Routes>

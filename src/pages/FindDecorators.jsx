@@ -5,13 +5,11 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useToast } from '@/components/ui/Toast';
-import { useApp } from '@/context/AppContext';
 
 const SERVICES = ['Ceremony flowers', 'Stage & backdrop', 'Table styling', 'Lighting', 'Draping', 'Setup & teardown'];
 
 export function FindDecorators() {
   const { toast } = useToast();
-  const { isAdmin } = useApp();
   const [eventType, setEventType] = useState('Wedding');
   const [location, setLocation] = useState('');
   const [budget, setBudget] = useState('');
@@ -93,9 +91,6 @@ export function FindDecorators() {
             <Link to={`/bookings?new=1&venue=${encodeURIComponent(location.trim())}&eventType=${encodeURIComponent(eventType)}&notes=${encodeURIComponent(brief)}`} className="inline-flex items-center justify-center gap-2 h-10 rounded-xl border border-sage/40 bg-white/80 px-4 text-sm font-semibold text-forest hover:bg-white transition">
               Book a venue <ArrowRight className="h-4 w-4" />
             </Link>
-            {isAdmin && <Link to="/admin/bookings" className="inline-flex items-center justify-center gap-2 h-10 rounded-xl border border-sage/40 bg-white/80 px-4 text-sm font-semibold text-forest hover:bg-white transition">
-              Admin booking approvals <ArrowRight className="h-4 w-4" />
-            </Link>}
           </div>
           <p className="mt-5 pt-4 border-t border-sage/25 flex gap-2 text-[11px] leading-relaxed text-charcoal/50"><MapPin className="h-3.5 w-3.5 shrink-0 mt-0.5" />Decorator profiles are not connected yet, so this brief stays in your browser until you choose to share it.</p>
         </aside>
